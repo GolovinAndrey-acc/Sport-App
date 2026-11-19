@@ -1,6 +1,6 @@
 // Service worker: сначала берёт свежую версию из сети,
 // а без интернета отдаёт сохранённую копию.
-const CACHE = "sport-v2";
+const CACHE = "sport-v4";
 const FILES = ["./", "index.html", "style.css", "app.js", "data.js", "manifest.json", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -18,7 +18,7 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, { cache: "no-cache" })
       .then(res => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy));

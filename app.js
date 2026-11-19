@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.2";
+const APP_VERSION = "0.3";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -22,7 +22,7 @@ function setChrome(title, tab, back) {
   backBtn.hidden = !back;
   backBtn.onclick = back ? () => { location.hash = back; } : null;
   document.querySelectorAll("#tabbar a").forEach(a => a.classList.toggle("active", a.dataset.tab === tab));
-  window.scrollTo(0, 0);
+  window.scrollTo({ top: 0 });
 }
 
 // ---------- Экраны ----------
@@ -77,28 +77,40 @@ function exerciseCard(ex) {
     </details>`;
 }
 
+let currentSection = null;
+
 function renderSection(sectionId, subId) {
   const s = SECTIONS.find(x => x.id === sectionId);
   if (!s) return renderHome();
   const sub = s.subs.find(x => x.id === subId) || s.subs[0];
 
-  setChrome(s.title, "home", "#/");
-  
-
-  const chips = s.subs.map(x =>
-    `<a class="chip${x.id === sub.id ? " active" : ""}" href="#/s/${s.id}/${x.id}">${esc(x.title)}</a>`
-  ).join("");
-
   const list = sub.exercises?.length
     ? sub.exercises.map(exerciseCard).join("")
     : `<div class="empty"><div class="big">${s.icon}</div>«${esc(sub.title)}»: упражнения появятся позже</div>`;
 
+  // Смена подвкладки внутри того же раздела — меняем только список, без перерисовки экрана
+  const listEl = document.getElementById("list");
+  if (currentSection === s.id && listEl) {
+    document.querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c.dataset.sub === sub.id));
+    document.querySelector(".chip.active")?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+    listEl.innerHTML = list;
+    listEl.classList.remove("swap"); void listEl.offsetWidth; listEl.classList.add("swap");
+    return "keep";
+  }
+
+  setChrome(s.title, "home", "#/");
+  const chips = s.subs.map(x =>
+    `<a class="chip${x.id === sub.id ? " active" : ""}" data-sub="${x.id}" href="#/s/${s.id}/${x.id}">${esc(x.title)}</a>`
+  ).join("");
+
   view.innerHTML = `
     <div class="chips">${chips}</div>
     ${s.note ? `<div class="note">⚠️ ${esc(s.note)}</div>` : ""}
-    ${list}
+    <div id="list">${list}</div>
   `;
+  currentSection = s.id;
   document.querySelector(".chip.active")?.scrollIntoView({ inline: "center", block: "nearest" });
+  return "forward";
 }
 
 function renderNutrition() {
@@ -159,11 +171,20 @@ function renderSettings() {
 
 function route() {
   const parts = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
-  view.style.removeProperty("--c");
-  if (parts[0] === "s") return renderSection(parts[1], parts[2]);
-  if (parts[0] === "nutrition") return renderNutrition();
-  if (parts[0] === "settings") return renderSettings();
-  renderHome();
+  let mode;
+  if (parts[0] === "s") mode = renderSection(parts[1], parts[2]);
+  else {
+    currentSection = null;
+    if (parts[0] === "nutrition") renderNutrition();
+    else if (parts[0] === "settings") renderSettings();
+    else renderHome();
+  }
+  if (mode === "keep") return;
+  // Плавное появление экрана
+  view.classList.remove("enter", "forward");
+  void view.offsetWidth;
+  view.classList.add("enter");
+  if (mode === "forward") view.classList.add("forward");
 }
 
 window.addEventListener("hashchange", route);
