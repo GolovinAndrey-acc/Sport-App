@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.1";
+const APP_VERSION = "0.2";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -30,11 +30,12 @@ function setChrome(title, tab, back) {
 function sectionCard(s, wide) {
   const n = countExercises(s);
   return `
-    <a class="section-card${wide ? " wide" : ""}" href="#/s/${s.id}" style="--c:${s.color}">
-      <div class="ico">${s.icon}</div>
-      <div>
+    <a class="section-card${wide ? " wide" : ""}" href="#/s/${s.id}">
+      <div class="top">${s.icon}</div>
+      <div class="bottom">
         <div class="name">${esc(s.title)}</div>
-        <div class="meta">${s.subs.length} подвкладок · ${n ? n + " упр." : "пока пусто"}</div>
+        <div class="meta"><span class="dot mint"></span>${s.subs.length} подвкладок</div>
+        <div class="meta"><span class="dot blue"></span>${n ? n + " упражнений" : "пока пусто"}</div>
       </div>
     </a>`;
 }
@@ -82,7 +83,7 @@ function renderSection(sectionId, subId) {
   const sub = s.subs.find(x => x.id === subId) || s.subs[0];
 
   setChrome(s.title, "home", "#/");
-  view.style.setProperty("--c", s.color);
+  
 
   const chips = s.subs.map(x =>
     `<a class="chip${x.id === sub.id ? " active" : ""}" href="#/s/${s.id}/${x.id}">${esc(x.title)}</a>`

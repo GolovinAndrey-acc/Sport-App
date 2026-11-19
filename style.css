@@ -1,12 +1,16 @@
 :root {
-  --bg: #0f1115;
-  --card: #1a1d24;
-  --card2: #232731;
-  --text: #f2f3f5;
-  --muted: #9aa0ab;
-  --line: #2c313c;
-  --accent: #4f8cff;
-  --radius: 16px;
+  --mint: #00FFA9;
+  --blue: #0D4DFF;
+  --grad: linear-gradient(135deg, var(--mint) 0%, var(--blue) 100%);
+  --bg1: #2a2c8f;
+  --bg2: #1a1b5e;
+  --glass: rgba(255, 255, 255, 0.10);
+  --glass-line: rgba(255, 255, 255, 0.18);
+  --text: #ffffff;
+  --muted: rgba(255, 255, 255, 0.68);
+  --ink: #1b1d4a;
+  --ink-muted: #8a8fb0;
+  --radius: 22px;
   --top: env(safe-area-inset-top, 0px);
   --bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -15,106 +19,141 @@
 
 html, body {
   margin: 0;
-  background: var(--bg);
+  min-height: 100%;
   color: var(--text);
   font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+body {
+  background: radial-gradient(120% 60% at 0% 0%, #3a3cb0 0%, transparent 60%),
+              linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
 #topbar {
   position: sticky; top: 0; z-index: 10;
   display: flex; align-items: center; gap: 8px;
-  padding: calc(12px + var(--top)) 16px 12px;
-  background: rgba(15, 17, 21, 0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--line);
+  padding: calc(14px + var(--top)) 18px 14px;
+  background: rgba(32, 34, 118, 0.75);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--glass-line);
 }
-#topbar h1 { margin: 0; font-size: 20px; font-weight: 700; }
+#topbar h1 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
 
 .icon-btn {
-  background: none; border: 0; color: var(--text);
-  font-size: 32px; line-height: 1; padding: 0 8px 4px 0; cursor: pointer;
+  background: var(--glass); border: 1px solid var(--glass-line); color: var(--text);
+  width: 36px; height: 36px; border-radius: 12px;
+  font-size: 26px; line-height: 1; padding: 0 0 4px; cursor: pointer;
 }
 
-#view { padding: 16px 16px calc(90px + var(--bottom)); max-width: 640px; margin: 0 auto; }
+#view { padding: 18px 16px calc(110px + var(--bottom)); max-width: 640px; margin: 0 auto; }
 
-/* ---------- Главная: сетка разделов ---------- */
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.group-title { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; margin: 6px 4px 12px; }
+.group-title:not(:first-child) { margin-top: 26px; }
+
+/* ---------- Главная: карточки как в референсе ---------- */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .section-card {
-  display: flex; flex-direction: column; justify-content: space-between;
-  min-height: 120px; padding: 16px;
-  background: var(--card); border-radius: var(--radius);
-  border-top: 4px solid var(--c, var(--accent));
-  color: var(--text); text-decoration: none;
+  display: flex; flex-direction: column;
+  border-radius: var(--radius); overflow: hidden;
+  background: #fff; text-decoration: none;
+  box-shadow: 0 10px 30px rgba(8, 10, 60, 0.35);
+  transition: transform .12s ease;
 }
-.section-card:active { transform: scale(0.98); }
-.section-card .ico { font-size: 30px; }
-.section-card .name { font-weight: 650; font-size: 16px; }
-.section-card .meta { color: var(--muted); font-size: 13px; }
-.section-card.wide { grid-column: span 2; min-height: 90px; }
+.section-card:active { transform: scale(0.97); }
+.section-card .top {
+  background: var(--grad);
+  height: 96px; display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+}
+.section-card .bottom { padding: 12px 14px 14px; }
+.section-card .name { color: var(--ink); font-weight: 700; font-size: 15px; }
+.section-card .meta { display: flex; align-items: center; gap: 6px; color: var(--ink-muted); font-size: 12.5px; margin-top: 4px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+.dot.mint { background: var(--mint); }
+.dot.blue { background: var(--blue); }
 
-.group-title { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .05em; margin: 22px 4px 10px; }
+.section-card.wide { grid-column: span 2; flex-direction: row; }
+.section-card.wide .top { width: 96px; height: auto; min-height: 84px; flex: 0 0 auto; }
+.section-card.wide .bottom { display: flex; flex-direction: column; justify-content: center; }
 
 /* ---------- Раздел: подвкладки ---------- */
 .chips {
-  display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 14px;
-  scrollbar-width: none; margin: 0 -16px; padding-left: 16px; padding-right: 16px;
+  display: flex; gap: 8px; overflow-x: auto;
+  margin: 0 -16px; padding: 2px 16px 16px;
+  scrollbar-width: none;
 }
 .chips::-webkit-scrollbar { display: none; }
 .chip {
-  flex: 0 0 auto; padding: 8px 14px; border-radius: 999px;
-  background: var(--card); color: var(--text); border: 1px solid var(--line);
+  flex: 0 0 auto; padding: 9px 16px; border-radius: 999px;
+  background: var(--glass); color: var(--text); border: 1px solid var(--glass-line);
   font-size: 14px; text-decoration: none; white-space: nowrap;
 }
-.chip.active { background: var(--c, var(--accent)); border-color: transparent; color: #0f1115; font-weight: 650; }
+.chip.active {
+  background: var(--grad); border-color: transparent; font-weight: 650;
+  box-shadow: 0 6px 18px rgba(13, 77, 255, 0.45);
+}
 
 .note {
-  background: rgba(242, 201, 76, 0.1); border: 1px solid rgba(242, 201, 76, 0.35);
-  color: #f5dc8a; padding: 12px 14px; border-radius: 12px; font-size: 14px; margin-bottom: 14px;
+  background: rgba(0, 255, 169, 0.10); border: 1px solid rgba(0, 255, 169, 0.40);
+  color: #c9ffe9; padding: 12px 14px; border-radius: 16px; font-size: 14px; margin-bottom: 14px;
 }
 
 .empty {
-  text-align: center; color: var(--muted); padding: 48px 16px;
-  background: var(--card); border-radius: var(--radius); border: 1px dashed var(--line);
+  text-align: center; color: var(--muted); padding: 44px 18px;
+  background: var(--glass); border: 1px dashed var(--glass-line); border-radius: var(--radius);
 }
-.empty .big { font-size: 40px; margin-bottom: 8px; }
+.empty .big {
+  width: 72px; height: 72px; margin: 0 auto 14px; border-radius: 22px;
+  background: var(--grad); display: flex; align-items: center; justify-content: center;
+  font-size: 34px; box-shadow: 0 10px 26px rgba(13, 77, 255, 0.45);
+}
 
 /* ---------- Карточка упражнения ---------- */
-.ex { background: var(--card); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
-.ex summary { list-style: none; padding: 14px 16px; cursor: pointer; }
+.ex {
+  background: #fff; color: var(--ink); border-radius: var(--radius);
+  margin-bottom: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(8, 10, 60, 0.3);
+}
+.ex summary { list-style: none; padding: 14px 16px 14px 20px; cursor: pointer; position: relative; }
+.ex summary::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--grad); }
 .ex summary::-webkit-details-marker { display: none; }
-.ex .ex-name { font-weight: 650; }
-.ex .ex-muscles { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.ex .ex-name { font-weight: 700; }
+.ex .ex-muscles { color: var(--ink-muted); font-size: 13px; margin-top: 2px; }
 .ex .ex-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-.tag { background: var(--card2); border-radius: 8px; padding: 3px 8px; font-size: 12px; color: var(--muted); }
-.ex .ex-body { padding: 0 16px 16px; border-top: 1px solid var(--line); }
-.ex h4 { margin: 14px 0 6px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.tag { background: #eef1ff; color: #3a48a8; border-radius: 8px; padding: 3px 9px; font-size: 12px; font-weight: 600; }
+.ex .ex-body { padding: 0 16px 16px 20px; border-top: 1px solid #eceef6; }
+.ex h4 { margin: 14px 0 6px; font-size: 12px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .05em; }
 .ex ol { margin: 0; padding-left: 20px; }
 .ex p { margin: 0; }
-.ex a { color: var(--c, var(--accent)); }
+.ex a { color: var(--blue); font-weight: 600; }
 
 /* ---------- Общие блоки ---------- */
-.panel { background: var(--card); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+.panel { background: #fff; color: var(--ink); border-radius: var(--radius); padding: 18px; margin-bottom: 12px; }
 .panel h3 { margin: 0 0 6px; font-size: 17px; }
-.panel p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.panel p { margin: 0 0 14px; color: var(--ink-muted); font-size: 14px; }
 .btn {
-  display: inline-block; padding: 10px 16px; border-radius: 12px; border: 0;
-  background: var(--accent); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+  display: inline-block; padding: 11px 18px; border-radius: 14px; border: 0;
+  background: var(--grad); color: #fff; font-size: 15px; font-weight: 650; cursor: pointer;
+  box-shadow: 0 6px 18px rgba(13, 77, 255, 0.35);
 }
-.btn.secondary { background: var(--card2); color: var(--text); }
+.btn.secondary { background: #eef1ff; color: #3a48a8; box-shadow: none; }
 .row { display: flex; gap: 8px; flex-wrap: wrap; }
 .small { color: var(--muted); font-size: 12px; text-align: center; margin-top: 20px; }
 
 /* ---------- Нижняя панель ---------- */
 #tabbar {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  position: fixed; left: 12px; right: 12px; bottom: calc(10px + var(--bottom)); z-index: 10;
   display: flex; justify-content: space-around;
-  padding: 8px 8px calc(8px + var(--bottom));
-  background: rgba(20, 22, 28, 0.95); backdrop-filter: blur(12px);
-  border-top: 1px solid var(--line);
+  padding: 8px;
+  max-width: 616px; margin: 0 auto;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 24px;
+  box-shadow: 0 12px 34px rgba(8, 10, 60, 0.45);
 }
 #tabbar a {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  color: var(--muted); text-decoration: none; font-size: 11px; min-width: 80px;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  color: var(--ink-muted); text-decoration: none; font-size: 11px; font-weight: 600;
+  flex: 1; padding: 6px 4px; border-radius: 18px;
 }
-#tabbar a span { font-size: 22px; }
-#tabbar a.active { color: var(--text); }
+#tabbar a span { font-size: 21px; }
+#tabbar a.active { background: var(--grad); color: #fff; }
