@@ -1,0 +1,174 @@
+// Логика приложения: навигация по вкладкам и отрисовка экранов.
+// Данные (разделы и упражнения) лежат в data.js.
+
+const APP_VERSION = "0.1";
+const STORAGE_PREFIX = "sport:";
+const view = document.getElementById("view");
+const titleEl = document.getElementById("title");
+const backBtn = document.getElementById("backBtn");
+
+const TRAINING_IDS = ["legs", "arms", "back", "chest", "core"];
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function countExercises(section) {
+  return section.subs.reduce((n, s) => n + (s.exercises?.length || 0), 0);
+}
+
+function setChrome(title, tab, back) {
+  titleEl.textContent = title;
+  backBtn.hidden = !back;
+  backBtn.onclick = back ? () => { location.hash = back; } : null;
+  document.querySelectorAll("#tabbar a").forEach(a => a.classList.toggle("active", a.dataset.tab === tab));
+  window.scrollTo(0, 0);
+}
+
+// ---------- Экраны ----------
+
+function sectionCard(s, wide) {
+  const n = countExercises(s);
+  return `
+    <a class="section-card${wide ? " wide" : ""}" href="#/s/${s.id}" style="--c:${s.color}">
+      <div class="ico">${s.icon}</div>
+      <div>
+        <div class="name">${esc(s.title)}</div>
+        <div class="meta">${s.subs.length} подвкладок · ${n ? n + " упр." : "пока пусто"}</div>
+      </div>
+    </a>`;
+}
+
+function renderHome() {
+  setChrome("Тренировки", "home");
+  const training = SECTIONS.filter(s => TRAINING_IDS.includes(s.id));
+  const health = SECTIONS.filter(s => !TRAINING_IDS.includes(s.id));
+  view.innerHTML = `
+    <div class="group-title">Мышцы</div>
+    <div class="grid">${training.map(s => sectionCard(s)).join("")}</div>
+    <div class="group-title">Здоровье</div>
+    <div class="grid">${health.map(s => sectionCard(s, true)).join("")}</div>
+  `;
+}
+
+function exerciseCard(ex) {
+  const tags = [
+    ex.sets && `Подходы: ${esc(ex.sets)}`,
+    ex.reps && `Повторы: ${esc(ex.reps)}`,
+    ex.rest && `Отдых: ${esc(ex.rest)}`,
+  ].filter(Boolean).map(t => `<span class="tag">${t}</span>`).join("");
+
+  const tech = Array.isArray(ex.technique) && ex.technique.length
+    ? `<h4>Техника</h4><ol>${ex.technique.map(t => `<li>${esc(t)}</li>`).join("")}</ol>` : "";
+  const prog = ex.progression ? `<h4>Когда увеличивать нагрузку</h4><p>${esc(ex.progression)}</p>` : "";
+  const safe = ex.safety ? `<h4>Безопасность</h4><p>${esc(ex.safety)}</p>` : "";
+  const vid = ex.video ? `<h4>Видео</h4><p><a href="${esc(ex.video)}" target="_blank" rel="noopener">Открыть</a></p>` : "";
+  const body = tech + prog + safe + vid;
+
+  return `
+    <details class="ex">
+      <summary>
+        <div class="ex-name">${esc(ex.name)}</div>
+        ${ex.muscles ? `<div class="ex-muscles">${esc(ex.muscles)}</div>` : ""}
+        ${tags ? `<div class="ex-tags">${tags}</div>` : ""}
+      </summary>
+      ${body ? `<div class="ex-body">${body}</div>` : ""}
+    </details>`;
+}
+
+function renderSection(sectionId, subId) {
+  const s = SECTIONS.find(x => x.id === sectionId);
+  if (!s) return renderHome();
+  const sub = s.subs.find(x => x.id === subId) || s.subs[0];
+
+  setChrome(s.title, "home", "#/");
+  view.style.setProperty("--c", s.color);
+
+  const chips = s.subs.map(x =>
+    `<a class="chip${x.id === sub.id ? " active" : ""}" href="#/s/${s.id}/${x.id}">${esc(x.title)}</a>`
+  ).join("");
+
+  const list = sub.exercises?.length
+    ? sub.exercises.map(exerciseCard).join("")
+    : `<div class="empty"><div class="big">${s.icon}</div>«${esc(sub.title)}»: упражнения появятся позже</div>`;
+
+  view.innerHTML = `
+    <div class="chips">${chips}</div>
+    ${s.note ? `<div class="note">⚠️ ${esc(s.note)}</div>` : ""}
+    ${list}
+  `;
+  document.querySelector(".chip.active")?.scrollIntoView({ inline: "center", block: "nearest" });
+}
+
+function renderNutrition() {
+  setChrome("Питание", "nutrition");
+  view.innerHTML = `
+    <div class="empty">
+      <div class="big">🍽️</div>
+      Здесь будет дневник питания:<br>что съедено за день, калории, белки, жиры и углеводы.
+    </div>`;
+}
+
+function renderSettings() {
+  setChrome("Настройки", "settings");
+  view.innerHTML = `
+    <div class="panel">
+      <h3>Резервная копия</h3>
+      <p>Твои записи хранятся только на этом телефоне. Время от времени сохраняй копию в файл, чтобы не потерять их.</p>
+      <div class="row">
+        <button class="btn" id="exportBtn">Сохранить копию</button>
+        <button class="btn secondary" id="importBtn">Загрузить копию</button>
+        <input type="file" id="importFile" accept="application/json" hidden>
+      </div>
+    </div>
+    <div class="small">Версия ${APP_VERSION}</div>
+  `;
+
+  document.getElementById("exportBtn").onclick = () => {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k.startsWith(STORAGE_PREFIX)) data[k] = localStorage.getItem(k);
+    }
+    const blob = new Blob([JSON.stringify({ app: "sport", version: APP_VERSION, data }, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `sport-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+
+  const fileInput = document.getElementById("importFile");
+  document.getElementById("importBtn").onclick = () => fileInput.click();
+  fileInput.onchange = async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    try {
+      const parsed = JSON.parse(await file.text());
+      const entries = Object.entries(parsed.data || {}).filter(([k]) => k.startsWith(STORAGE_PREFIX));
+      entries.forEach(([k, v]) => localStorage.setItem(k, v));
+      fileInput.insertAdjacentHTML("afterend", `<p style="margin-top:10px">✅ Загружено записей: ${entries.length}</p>`);
+    } catch {
+      fileInput.insertAdjacentHTML("afterend", `<p style="margin-top:10px">❌ Не удалось прочитать файл</p>`);
+    }
+  };
+}
+
+// ---------- Навигация ----------
+
+function route() {
+  const parts = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+  view.style.removeProperty("--c");
+  if (parts[0] === "s") return renderSection(parts[1], parts[2]);
+  if (parts[0] === "nutrition") return renderNutrition();
+  if (parts[0] === "settings") return renderSettings();
+  renderHome();
+}
+
+window.addEventListener("hashchange", route);
+route();
+
+// ---------- Работа без интернета ----------
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
