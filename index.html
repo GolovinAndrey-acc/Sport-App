@@ -68,6 +68,7 @@
       wait = wait || 0;
       if (wait) { s.classList.add("sp-wait"); setTimeout(function () { s.classList.remove("sp-wait"); }, wait); }
       var root = document.documentElement;
+      root.classList.add("cards-roll");   // карточки выкатываются только после заставки
       var v = document.getElementById("view");
       if (v) { v.classList.remove("enter", "forward"); void v.offsetWidth; v.classList.add("enter"); }
 
@@ -132,6 +133,7 @@
         s.classList.add("out");
         root.classList.remove("splashing", "sp-hold");
         setTimeout(function () { s.remove(); }, 400);
+        setTimeout(function () { root.classList.remove("cards-roll"); }, 2200);
       };
       setTimeout(done, 4950 + wait);
       s.addEventListener("click", done);
