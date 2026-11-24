@@ -303,6 +303,7 @@ html.splashing, html.splashing body { overflow: hidden; }
   animation: fadeIn .2s var(--d) both;
 }
 #splash .f.c-b { background: #0f1ff5; }
+#splash .f .sym.crown { font-size: 25px; font-family: "Apple Symbols", "Segoe UI Symbol", "DejaVu Sans", sans-serif; }
 #splash .f { display: flex; align-items: center; justify-content: center; line-height: 1; font-style: normal; }
 #splash .f .sym {
   font: 800 21px/1 -apple-system, "SF Pro Display", "Segoe UI", Roboto, sans-serif;

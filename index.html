@@ -90,6 +90,7 @@
         for (var f = 0; f < 6; f++) {
           var c = faceColor(x, y, z, faces[f]), ic = "";
           if (c === BL && (faces[f] === "ft" || faces[f] === "rt")) ic = icons[iconIdx++ % icons.length];
+          if (c === LT && faces[f] === "ft") ic = '<b class="sym crown">\u265B\uFE0E</b>';
           html += '<i class="f ' + faces[f] + " c-" + c + '">' + ic + "</i>";
         }
         html += "</div></div>";
