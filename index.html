@@ -43,11 +43,16 @@
   </div>
   <script>
     // Заставка: комната с предметами → выпрямляется → предметы падают → из блоков собирается куб
+    // Показывается при каждом запуске и при каждом возвращении в приложение
     (function () {
-      var s = document.getElementById("splash");
-      var seen = false;
-      try { seen = sessionStorage.getItem("sport:splash") === "1"; sessionStorage.setItem("sport:splash", "1"); } catch (e) {}
-      if (seen || matchMedia("(prefers-reduced-motion: reduce)").matches) { s.remove(); return; }
+      var first = document.getElementById("splash");
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) { first.remove(); return; }
+      var template = first.cloneNode(true);
+
+      function play(s) {
+      var root = document.documentElement;
+      var v = document.getElementById("view");
+      if (v) { v.classList.remove("enter", "forward"); void v.offsetWidth; v.classList.add("enter"); }
 
       var O = 'stroke="#1b2d8a" stroke-width="3" stroke-linejoin="round"';
       var objs = [
@@ -96,7 +101,7 @@
         }
         html += "</div></div>";
       }
-      document.getElementById("spCube").innerHTML = room + html;
+      s.querySelector(".sp-cube").innerHTML = room + html;
 
       var k = Math.min(innerWidth / 380, innerHeight / 520, 2.2);
       s.style.setProperty("--k", k.toFixed(3));
@@ -105,14 +110,33 @@
       setTimeout(function () { document.documentElement.classList.remove("sp-hold"); }, 4150);
 
       var done = function () {
-        if (!s.isConnected) return;
+        removeEventListener("keydown", done);
+        if (!s.isConnected || s.classList.contains("out")) return;
         s.classList.add("out");
-        document.documentElement.classList.remove("splashing", "sp-hold");
+        root.classList.remove("splashing", "sp-hold");
         setTimeout(function () { s.remove(); }, 400);
       };
       setTimeout(done, 4950);
       s.addEventListener("click", done);
-      addEventListener("keydown", done, { once: true });
+      addEventListener("keydown", done);
+      }
+
+      play(first);
+
+      // Вернулись в приложение (свернули и открыли снова) — заставка заново
+      var hiddenAt = 0;
+      function replay() {
+        var old = document.getElementById("splash");
+        if (old) old.remove();
+        var s = template.cloneNode(true);
+        document.body.insertBefore(s, document.body.firstChild);
+        play(s);
+      }
+      document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "hidden") hiddenAt = Date.now();
+        else if (hiddenAt && Date.now() - hiddenAt > 800) replay();
+      });
+      addEventListener("pageshow", function (e) { if (e.persisted) replay(); });
     })();
   </script>
   <header id="topbar">
