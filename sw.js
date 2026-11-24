@@ -1,6 +1,6 @@
-// Service worker: сначала берёт свежую версию из сети,
-// а без интернета отдаёт сохранённую копию.
-const CACHE = "sport-v23";
+// Service worker: приложение открывается мгновенно из сохранённой копии,
+// а свежая версия с GitHub тихо скачивается в фоне и показывается при следующем открытии.
+const CACHE = "sport-v24";
 const FILES = ["./", "index.html", "style.css", "app.js", "data.js", "manifest.json", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -16,14 +16,25 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", e => {
-  if (e.request.method !== "GET") return;
+  const req = e.request;
+  if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
+  const key = req.mode === "navigate" ? "index.html" : req;
+
   e.respondWith(
-    fetch(e.request, { cache: "no-cache" })
-      .then(res => {
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, copy));
-        return res;
+    caches.open(CACHE).then(cache =>
+      cache.match(key, { ignoreSearch: true }).then(cached => {
+        const fresh = fetch(req, { cache: "no-cache" })
+          .then(res => {
+            if (res.ok) cache.put(key, res.clone());
+            return res;
+          })
+          .catch(() => cached);
+        if (cached) {
+          e.waitUntil(fresh);   // обновляем копию в фоне
+          return cached;         // а показываем сразу сохранённую
+        }
+        return fresh;
       })
-      .catch(() => caches.match(e.request, { ignoreSearch: true }).then(r => r || caches.match("index.html")))
+    )
   );
 });

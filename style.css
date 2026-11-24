@@ -205,11 +205,14 @@ body::before {
 
 /* ---------- Заставка: комната → куб ---------- */
 #splash {
-  position: fixed; inset: 0; z-index: 100;
+  position: fixed; inset: 0; z-index: 1000;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; cursor: pointer;
+  background: #0c0d2b;                       /* сплошной тёмный фон — ничего не просвечивает */
+  animation: splashBgOff 0s 4.0s forwards;   /* убирается только когда раскрывается «окно» */
   transition: opacity .4s var(--ease);
 }
+@keyframes splashBgOff { to { background: transparent; } }
 #splash.out { opacity: 0; pointer-events: none; }
 html.splashing, html.splashing body { overflow: hidden; }
 
