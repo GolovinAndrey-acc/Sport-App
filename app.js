@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.31";
+const APP_VERSION = "0.32";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -286,12 +286,13 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").then(reg => reg.update()).catch(() => {});
   });
-  // Пришла новая версия — применяем её сразу (во время заставки) или при следующем возвращении
-  let reloading = false;
+  // Пришла новая версия — применяем её незаметно: перезагружаемся, когда приложение свёрнуто,
+  // а не во время заставки (иначе куб появлялся дважды)
+  let pending = false;
   navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (!hadController || reloading) return;
-    const apply = () => { if (!reloading) { reloading = true; location.reload(); } };
-    if (document.getElementById("splash")) apply();
-    else document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") apply(); }, { once: true });
+    if (hadController) pending = true;
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (pending && document.visibilityState === "hidden") { pending = false; location.reload(); }
   });
 }
