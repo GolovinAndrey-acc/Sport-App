@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.30";
+const APP_VERSION = "0.31";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -243,41 +243,41 @@ function currentTabIndex() {
   if (h.startsWith("#/settings")) return 2;
   return 0;
 }
-let swipeLock = 0;
 function swipeTab(step) {
-  if (Date.now() < swipeLock || document.getElementById("splash")) return;
-  swipeLock = Date.now() + 350;
+  if (document.getElementById("splash")) return;
   const inSection = depthOf(location.hash) === 1;
-  if (inSection && step < 0) { forcedDir = "vt-back"; navigate("#/"); return; }   // свайп «назад» из раздела
+  if (inSection && step < 0) { navigate("#/"); return; }   // свайп «назад» из раздела
   const i = currentTabIndex() + step;
   if (i < 0 || i >= TAB_ORDER.length) return;
-  forcedDir = step > 0 ? "vt-next" : "vt-prev";
   navigate(TAB_ORDER[i]);
 }
 
-// Трекпад: горизонтальная прокрутка двумя пальцами
-let wheelAcc = 0, wheelT = 0;
+// Трекпад: срабатывает сразу в начале жеста; инерция того же жеста игнорируется
+let wheelAcc = 0, wheelLast = 0, gestureUsed = false;
 window.addEventListener("wheel", e => {
   if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
   e.preventDefault();                                   // не даём браузеру показать белый экран «назад»
   const chips = e.target.closest && e.target.closest(".chips");
   if (chips) { chips.scrollLeft += e.deltaX; return; }  // ряд подвкладок листается как обычно
-  if (performance.now() - wheelT > 250) wheelAcc = 0;
-  wheelT = performance.now();
+  const now = performance.now();
+  if (now - wheelLast > 120) { wheelAcc = 0; gestureUsed = false; }   // начался новый жест
+  wheelLast = now;
+  if (gestureUsed) return;
   wheelAcc += e.deltaX;
-  if (Math.abs(wheelAcc) > 90) { swipeTab(wheelAcc > 0 ? 1 : -1); wheelAcc = 0; }
+  if (Math.abs(wheelAcc) > 18) { gestureUsed = true; swipeTab(wheelAcc > 0 ? 1 : -1); }
 }, { passive: false });
 
-// Телефон: свайп пальцем влево/вправо
+// Телефон: переключение прямо во время движения пальца
 let tx = 0, ty = 0, tOk = false;
 window.addEventListener("touchstart", e => {
   const t = e.touches[0]; tx = t.clientX; ty = t.clientY;
   tOk = e.touches.length === 1 && !(e.target.closest && e.target.closest(".chips"));
 }, { passive: true });
-window.addEventListener("touchend", e => {
+window.addEventListener("touchmove", e => {
   if (!tOk) return;
-  const t = e.changedTouches[0], dx = t.clientX - tx, dy = t.clientY - ty;
-  if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.8) swipeTab(dx < 0 ? 1 : -1);
+  const t = e.touches[0], dx = t.clientX - tx, dy = t.clientY - ty;
+  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) { tOk = false; swipeTab(dx < 0 ? 1 : -1); }
+  else if (Math.abs(dy) > 30) tOk = false;
 }, { passive: true });
 
 // ---------- Работа без интернета ----------
