@@ -1,6 +1,6 @@
 // Service worker: сначала берёт свежую версию из сети,
 // а без интернета отдаёт сохранённую копию.
-const CACHE = "sport-v17";
+const CACHE = "sport-v18";
 const FILES = ["./", "index.html", "style.css", "app.js", "data.js", "manifest.json", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
