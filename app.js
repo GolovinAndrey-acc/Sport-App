@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.25";
+const APP_VERSION = "0.26";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -20,7 +20,7 @@ function countExercises(section) {
 function setChrome(title, tab, back) {
   titleEl.textContent = title;
   backBtn.hidden = !back;
-  backBtn.onclick = back ? () => { location.hash = back; } : null;
+  backBtn.onclick = back ? () => navigate(back) : null;
   document.querySelectorAll("#tabbar a").forEach(a => a.classList.toggle("active", a.dataset.tab === tab));
   window.scrollTo({ top: 0 });
 }
@@ -198,7 +198,9 @@ function tabOf(hash) {
 }
 let lastHash = location.hash;
 
-window.addEventListener("hashchange", () => {
+// Переходы без записи в историю браузера: свайп двумя пальцами на Mac
+// (жест «назад/вперёд») больше не листает вкладки и не показывает белый экран.
+function onNavigate() {
   const from = lastHash, to = location.hash;
   lastHash = to;
   const sameSection = tabOf(from) === tabOf(to) && depthOf(to) === 1;
@@ -211,10 +213,35 @@ window.addEventListener("hashchange", () => {
   root.classList.add(dir);
   const t = document.startViewTransition(() => route());
   t.finished.finally(() => root.classList.remove(dir));
+}
+
+function navigate(hash) {
+  if (hash === location.hash) return;
+  history.replaceState(null, "", hash);
+  onNavigate();
+}
+
+document.addEventListener("click", e => {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a || e.metaKey || e.ctrlKey) return;
+  e.preventDefault();
+  navigate(a.getAttribute("href"));
 });
+window.addEventListener("hashchange", onNavigate);
 route();
 
 // ---------- Работа без интернета ----------
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  const hadController = !!navigator.serviceWorker.controller;
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").then(reg => reg.update()).catch(() => {});
+  });
+  // Пришла новая версия — применяем её сразу (во время заставки) или при следующем возвращении
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController || reloading) return;
+    const apply = () => { if (!reloading) { reloading = true; location.reload(); } };
+    if (document.getElementById("splash")) apply();
+    else document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") apply(); }, { once: true });
+  });
 }

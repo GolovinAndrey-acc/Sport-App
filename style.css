@@ -25,6 +25,7 @@ html {
   background: #0c0d2b;
   color-scheme: dark; /* цвет за краями страницы при прокрутке */
   overscroll-behavior: none;
+  overscroll-behavior-x: none;
 }
 html, body {
   margin: 0;
