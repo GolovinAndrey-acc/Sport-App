@@ -71,7 +71,7 @@ body::before {
   to   { opacity: 1; transform: none; }
 }
 @keyframes viewInSide {
-  from { opacity: 0; transform: translateX(18px); }
+  from { opacity: 0; transform: translateX(-24px); }
   to   { opacity: 1; transform: none; }
 }
 #view.enter > * { animation: viewIn .38s var(--ease) both; }
@@ -372,7 +372,7 @@ html.splashing, html.splashing body { overflow: hidden; }
 #view.enter .chip:nth-child(5) { animation-delay: .16s; }
 #view.enter .chip:nth-child(6) { animation-delay: .20s; }
 .empty .big { animation: icoPop .7s .1s cubic-bezier(.34, 1.56, .64, 1) both; }
-@keyframes chipIn { from { opacity: 0; transform: translateX(24px) scale(.9); } to { opacity: 1; transform: none; } }
+@keyframes chipIn { from { opacity: 0; transform: translateX(-24px) scale(.9); } to { opacity: 1; transform: none; } }
 
 /* Пока идёт заставка, появление разделов ждёт и начинается, когда открывается «окно» */
 html.sp-hold #view * { animation-play-state: paused !important; }
@@ -391,15 +391,19 @@ html.sp-hold #view * { animation-play-state: paused !important; }
 }
 
 /* Вглубь (открыли раздел): новый экран выезжает справа, старый уходит влево и тускнеет */
-html.vt-forward::view-transition-old(root) { animation-name: vtOutLeft; }
-html.vt-forward::view-transition-new(root) { animation-name: vtInRight; }
+html.vt-forward::view-transition-old(root) { animation-name: vtOutRightDim; }
+html.vt-forward::view-transition-new(root) { animation-name: vtInFromLeft; z-index: 2; }
 /* Назад: наоборот */
-html.vt-back::view-transition-old(root) { animation-name: vtOutRight; z-index: 2; }
-html.vt-back::view-transition-new(root) { animation-name: vtInLeft; }
+html.vt-back::view-transition-old(root) { animation-name: vtOutToLeft; z-index: 2; }
+html.vt-back::view-transition-new(root) { animation-name: vtInFromRightDim; }
 /* Между вкладками нижней панели: мягкое проявление с подъёмом */
 html.vt-tab::view-transition-old(root) { animation: vtFadeDown .3s ease-in both; }
 html.vt-tab::view-transition-new(root) { animation: vtFadeUp .5s .05s cubic-bezier(.22, 1, .36, 1) both; }
 
+@keyframes vtInFromLeft { from { transform: translateX(-100%); opacity: .6; box-shadow: 20px 0 40px rgba(0, 0, 0, .45); } to { transform: none; opacity: 1; box-shadow: 20px 0 40px rgba(0, 0, 0, 0); } }
+@keyframes vtOutRightDim { to { transform: translateX(28%) scale(.96); opacity: .35; filter: blur(2px); } }
+@keyframes vtOutToLeft { to { transform: translateX(-100%); opacity: .6; } }
+@keyframes vtInFromRightDim { from { transform: translateX(28%) scale(.96); opacity: .35; filter: blur(2px); } to { transform: none; opacity: 1; filter: none; } }
 @keyframes vtInRight  { from { transform: translateX(100%); box-shadow: -20px 0 40px rgba(0, 0, 0, .45); } to { transform: none; box-shadow: -20px 0 40px rgba(0, 0, 0, 0); } }
 @keyframes vtOutLeft  { to { transform: translateX(-28%) scale(.96); opacity: .35; filter: blur(2px); } }
 @keyframes vtInLeft   { from { transform: translateX(-28%) scale(.96); opacity: .35; filter: blur(2px); } to { transform: none; opacity: 1; filter: none; } }
