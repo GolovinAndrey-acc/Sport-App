@@ -372,3 +372,35 @@ html.splashing, html.splashing body { overflow: hidden; }
 
 /* Пока идёт заставка, появление разделов ждёт и начинается, когда открывается «окно» */
 html.sp-hold #view * { animation-play-state: paused !important; }
+
+/* ---------- Переходы между экранами (View Transitions) ---------- */
+#topbar { view-transition-name: topbar; }
+#tabbar { view-transition-name: tabbar; }
+::view-transition-group(topbar), ::view-transition-group(tabbar) { animation-duration: .45s; }
+
+::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: .55s;
+  animation-timing-function: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* Вглубь (открыли раздел): новый экран выезжает справа, старый уходит влево и тускнеет */
+html.vt-forward::view-transition-old(root) { animation-name: vtOutLeft; }
+html.vt-forward::view-transition-new(root) { animation-name: vtInRight; }
+/* Назад: наоборот */
+html.vt-back::view-transition-old(root) { animation-name: vtOutRight; z-index: 2; }
+html.vt-back::view-transition-new(root) { animation-name: vtInLeft; }
+/* Между вкладками нижней панели: мягкое проявление с подъёмом */
+html.vt-tab::view-transition-old(root) { animation: vtFadeDown .3s ease-in both; }
+html.vt-tab::view-transition-new(root) { animation: vtFadeUp .5s .05s cubic-bezier(.22, 1, .36, 1) both; }
+
+@keyframes vtInRight  { from { transform: translateX(100%); box-shadow: -20px 0 40px rgba(0, 0, 0, .45); } to { transform: none; box-shadow: -20px 0 40px rgba(0, 0, 0, 0); } }
+@keyframes vtOutLeft  { to { transform: translateX(-28%) scale(.96); opacity: .35; filter: blur(2px); } }
+@keyframes vtInLeft   { from { transform: translateX(-28%) scale(.96); opacity: .35; filter: blur(2px); } to { transform: none; opacity: 1; filter: none; } }
+@keyframes vtOutRight { to { transform: translateX(100%); } }
+@keyframes vtFadeDown { to { opacity: 0; transform: translateY(8px) scale(.985); } }
+@keyframes vtFadeUp   { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: none; } }
+
+/* Нажатие на карточку: короткий «отклик» */
+.section-card { will-change: transform; }
+.section-card:active .top { filter: brightness(1.15); }
+.section-card:active .ico { transform: scale(1.12); transition: transform .15s; }

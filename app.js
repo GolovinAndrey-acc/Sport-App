@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.20";
+const APP_VERSION = "0.21";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -187,7 +187,31 @@ function route() {
   if (mode === "forward") view.classList.add("forward");
 }
 
-window.addEventListener("hashchange", route);
+// ---------- Плавные переходы между экранами ----------
+function depthOf(hash) {
+  const p = hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+  return p[0] === "s" ? 1 : 0;
+}
+function tabOf(hash) {
+  const p = hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+  return p[0] === "s" ? "home:" + p[1] : (p[0] || "home");
+}
+let lastHash = location.hash;
+
+window.addEventListener("hashchange", () => {
+  const from = lastHash, to = location.hash;
+  lastHash = to;
+  const sameSection = tabOf(from) === tabOf(to) && depthOf(to) === 1;
+  if (!document.startViewTransition || sameSection || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    route();
+    return;
+  }
+  const dir = depthOf(to) > depthOf(from) ? "vt-forward" : depthOf(to) < depthOf(from) ? "vt-back" : "vt-tab";
+  const root = document.documentElement;
+  root.classList.add(dir);
+  const t = document.startViewTransition(() => route());
+  t.finished.finally(() => root.classList.remove(dir));
+});
 route();
 
 // ---------- Работа без интернета ----------
