@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.35";
+const APP_VERSION = "0.36";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -253,19 +253,25 @@ function swipeTab(step) {
   navigate(TAB_ORDER[i]);
 }
 
-// Трекпад: срабатывает сразу в начале жеста; инерция того же жеста игнорируется
-let wheelAcc = 0, wheelLast = 0, gestureUsed = false;
+// Трекпад: срабатывает сразу в начале жеста. Инерция (затухающие события после свайпа)
+// игнорируется, но новый свайп распознаётся сразу — по резкому росту силы движения или смене направления.
+let wheelAcc = 0, wheelLast = 0, gestureUsed = false, lastAbs = 0, lastDir = 0, lastFire = 0;
 window.addEventListener("wheel", e => {
   if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
   e.preventDefault();                                   // не даём браузеру показать белый экран «назад»
   const chips = e.target.closest && e.target.closest(".chips");
   if (chips) { chips.scrollLeft += e.deltaX; return; }  // ряд подвкладок листается как обычно
-  const now = performance.now();
-  if (now - wheelLast > 120) { wheelAcc = 0; gestureUsed = false; }   // начался новый жест
-  wheelLast = now;
+  const now = performance.now(), abs = Math.abs(e.deltaX), dir = Math.sign(e.deltaX);
+  const pause = now - wheelLast > 100;
+  const newPush = gestureUsed && now - lastFire > 180 && (dir !== lastDir || abs > lastAbs * 1.6 + 3);
+  if (pause || newPush) { wheelAcc = 0; gestureUsed = false; }
+  wheelLast = now; lastAbs = abs;
   if (gestureUsed) return;
   wheelAcc += e.deltaX;
-  if (Math.abs(wheelAcc) > 18) { gestureUsed = true; swipeTab(wheelAcc > 0 ? 1 : -1); }
+  if (Math.abs(wheelAcc) > 18) {
+    gestureUsed = true; lastDir = Math.sign(wheelAcc); lastFire = now;
+    swipeTab(wheelAcc > 0 ? 1 : -1);
+  }
 }, { passive: false });
 
 // Телефон: переключение прямо во время движения пальца
