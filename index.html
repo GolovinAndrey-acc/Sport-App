@@ -105,7 +105,7 @@
       var faces = ["ft", "bk", "rt", "lt", "tp", "bt"];
       for (var y = 0; y < 3; y++) for (var z = 0; z < 3; z++) for (var x = 0; x < 3; x++) {
         var vars = "--x:" + (x - 1) * B + "px;--y:" + (y - 1) * B + "px;--z:" + (z - 1) * B + "px;" +
-          "--d:" + (1.75 + (2 - y) * 0.3 + Math.random() * 0.22).toFixed(2) + "s";
+          "--d:" + (2.45 + (2 - y) * 0.36 + (x + z) * 0.035 + Math.random() * 0.08).toFixed(2) + "s";
         html += '<div class="blk" style="' + vars + '"><div class="b">';
         for (var f = 0; f < 6; f++) {
           var c = faceColor(x, y, z, faces[f]), ic = "";
@@ -122,7 +122,7 @@
       s.style.setProperty("--k", k.toFixed(3));
       s.style.setProperty("--hole", Math.ceil(Math.hypot(innerWidth, innerHeight) * 1.1) + "px");
       document.documentElement.classList.add("splashing", "sp-hold");
-      setTimeout(function () { document.documentElement.classList.remove("sp-hold"); }, 4150);
+      setTimeout(function () { document.documentElement.classList.remove("sp-hold"); }, 5050);
 
       var done = function () {
         removeEventListener("keydown", done);
@@ -131,7 +131,7 @@
         root.classList.remove("splashing", "sp-hold");
         setTimeout(function () { s.remove(); }, 400);
       };
-      setTimeout(done, 4950);
+      setTimeout(done, 5900);
       s.addEventListener("click", done);
       addEventListener("keydown", done);
       }
