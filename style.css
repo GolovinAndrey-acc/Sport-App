@@ -75,10 +75,10 @@ body::before {
   from { opacity: 0; transform: translateX(18px); }
   to   { opacity: 1; transform: none; }
 }
-#view.enter > * { animation: viewIn .2s var(--ease) both; }
+html.cards-roll #view.enter > * { animation: viewIn .38s var(--ease) both; }
 #view.enter.forward > * { animation-name: viewInSide; }
 
-#list.swap { animation: viewIn .2s var(--ease) both; }
+#list.swap { animation: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -162,7 +162,7 @@ body::before {
 .ex .ex-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .tag { background: var(--card2); color: #a9b6ff; border-radius: 8px; padding: 3px 9px; font-size: 12px; font-weight: 600; }
 .ex .ex-body { padding: 0 16px 16px 20px; border-top: 1px solid var(--line); }
-.ex[open] .ex-body { animation: viewIn .3s var(--ease) both; }
+.ex[open] .ex-body { animation: none; }
 .ex h4 { margin: 14px 0 6px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
 .ex ol { margin: 0; padding-left: 20px; }
 .ex p { margin: 0; }
@@ -344,7 +344,7 @@ html.cards-roll #view.enter .section-card .top {
   animation: topShine 1.1s ease-out both;
   animation-delay: calc(var(--i, 0) * 75ms + 120ms);
 }
-#view.enter .group-title { animation: titleIn .2s var(--ease) both; }
+#view.enter .group-title { animation: none; }
 html.cards-roll #view.enter .group-title { animation-duration: .6s; }
 html.cards-roll #view.enter .group-title:not(:first-child) { animation-delay: .35s; }
 
@@ -370,13 +370,13 @@ html.cards-roll #view.enter .group-title:not(:first-child) { animation-delay: .3
 }
 
 /* Подвкладки и пустой блок внутри раздела */
-#view.enter .chip { animation: chipIn .2s cubic-bezier(.25, .8, .25, 1) both; }
+#view.enter .chip { animation: none; }
 #view.enter .chip:nth-child(2) { animation-delay: 0.01s; }
 #view.enter .chip:nth-child(3) { animation-delay: 0.02s; }
 #view.enter .chip:nth-child(4) { animation-delay: 0.03s; }
 #view.enter .chip:nth-child(5) { animation-delay: 0.04s; }
 #view.enter .chip:nth-child(6) { animation-delay: 0.05s; }
-.empty .big { animation: icoPop .7s .1s cubic-bezier(.34, 1.56, .64, 1) both; }
+.empty .big { animation: none; }
 @keyframes chipIn { from { opacity: 0; transform: translateX(24px) scale(.9); } to { opacity: 1; transform: none; } }
 
 /* Пока идёт заставка, появление разделов ждёт и начинается, когда открывается «окно» */

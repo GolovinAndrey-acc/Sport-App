@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.29";
+const APP_VERSION = "0.30";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -201,11 +201,13 @@ let lastHash = location.hash;
 // Переходы без записи в историю браузера: свайп двумя пальцами на Mac
 // (жест «назад/вперёд») больше не листает вкладки и не показывает белый экран.
 let forcedDir = null;
+const INSTANT = true;   // переключение без анимации и задержки
 function onNavigate() {
   const from = lastHash, to = location.hash;
   lastHash = to;
   const sameSection = tabOf(from) === tabOf(to) && depthOf(to) === 1;
-  if (!document.startViewTransition || sameSection || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (INSTANT || !document.startViewTransition || sameSection || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    forcedDir = null;
     route();
     return;
   }
@@ -244,7 +246,7 @@ function currentTabIndex() {
 let swipeLock = 0;
 function swipeTab(step) {
   if (Date.now() < swipeLock || document.getElementById("splash")) return;
-  swipeLock = Date.now() + 700;
+  swipeLock = Date.now() + 350;
   const inSection = depthOf(location.hash) === 1;
   if (inSection && step < 0) { forcedDir = "vt-back"; navigate("#/"); return; }   // свайп «назад» из раздела
   const i = currentTabIndex() + step;
