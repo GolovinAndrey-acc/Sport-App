@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Спорт</title>
-  <meta name="theme-color" content="#11123a">
+  <meta name="theme-color" content="#0c0d2b">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -15,6 +15,103 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <script src="data.js"></script>
+  <div id="splash" aria-hidden="true">
+    <div class="sp-hole"></div>
+    <div class="sp-stage">
+      <div class="sp-scene"><div class="sp-cube" id="spCube"></div></div>
+    </div>
+    <svg width="0" height="0" style="position:absolute">
+      <defs>
+        <linearGradient id="pearlG" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#fff4d6"/><stop offset=".35" stop-color="#ffc9dd"/><stop offset=".7" stop-color="#c9b8ff"/><stop offset="1" stop-color="#8fb8ff"/>
+        </linearGradient>
+        <linearGradient id="pearlB" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#ffe0ef"/><stop offset=".5" stop-color="#b9c7ff"/><stop offset="1" stop-color="#4f7bff"/>
+        </linearGradient>
+        <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#fff3b8"/><stop offset=".6" stop-color="#ffd1e6"/><stop offset="1" stop-color="#b8c6ff"/>
+        </linearGradient>
+        <linearGradient id="coinG" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#d9fff1"/><stop offset=".45" stop-color="#9ff0d2"/><stop offset="1" stop-color="#7aa8ff"/>
+        </linearGradient>
+        <linearGradient id="clubG" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#5b6cff"/><stop offset="1" stop-color="#2230b8"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+  <script>
+    // Заставка: комната с предметами → выпрямляется → предметы падают → из блоков собирается куб
+    (function () {
+      var s = document.getElementById("splash");
+      var seen = false;
+      try { seen = sessionStorage.getItem("sport:splash") === "1"; sessionStorage.setItem("sport:splash", "1"); } catch (e) {}
+      if (seen || matchMedia("(prefers-reduced-motion: reduce)").matches) { s.remove(); return; }
+
+      var O = 'stroke="#1b2d8a" stroke-width="3" stroke-linejoin="round"';
+      var objs = [
+        // Клубный щит (по центру, объёмный, под наклоном)
+        ["o1", '<svg viewBox="0 0 120 150"><path d="M20 22 L60 8 L100 22 L104 70 Q100 118 60 142 Q20 118 16 70 Z" transform="translate(9 5)" fill="#1b2d8a"/>' +
+               '<path d="M20 22 L60 8 L100 22 L104 70 Q100 118 60 142 Q20 118 16 70 Z" fill="url(#pearlG)" ' + O + '/>' +
+               '<path d="M30 30 L60 19 L90 30 L93 70 Q90 108 60 128 Q30 108 27 70 Z" fill="url(#clubG)" stroke="#ffffff" stroke-width="4" stroke-linejoin="round"/>' +
+               '<path d="M36 52 L84 52" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity=".85"/><path d="M40 60 L80 60" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity=".6"/>' +
+               '<circle cx="60" cy="92" r="18" fill="#ffffff" stroke="#1b2d8a" stroke-width="2.5"/>' +
+               '<path d="M44 86 Q58 84 70 76 M45 100 Q62 98 76 88 M58 74 Q52 92 60 110" fill="none" stroke="#2230b8" stroke-width="2.5" stroke-linecap="round"/></svg>'],
+        // Ключ
+        ["o2", '<svg viewBox="0 0 50 100"><circle cx="25" cy="14" r="11" fill="none" stroke="#9fd0ff" stroke-width="5"/><circle cx="25" cy="14" r="11" fill="none" stroke="#1b2d8a" stroke-width="1.5"/><rect x="9" y="24" width="32" height="26" rx="6" fill="#2f4fe0" ' + O + '/><path d="M14 30 L14 44" stroke="#9fb4ff" stroke-width="3" stroke-linecap="round"/><path d="M19 50 L31 50 L31 92 L25 98 L19 92 L19 82 L14 82 L14 76 L19 76 L19 70 L12 70 L12 64 L19 64 Z" fill="url(#gold)" ' + O + '/><path d="M24 56 L24 88" stroke="#1b2d8a" stroke-width="2" stroke-dasharray="3 4"/></svg>'],
+        // Монета биткоина
+        ["o3", '<svg viewBox="0 0 64 64"><ellipse cx="34" cy="34" rx="26" ry="27" fill="#1b2d8a"/><circle cx="30" cy="31" r="27" fill="url(#coinG)" ' + O + '/><circle cx="30" cy="31" r="20" fill="none" stroke="#ffffff" stroke-opacity=".6" stroke-width="2"/><text x="30" y="41" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="28" fill="#1b2d8a">B</text><path d="M26 14 L26 20 M34 14 L34 20 M26 42 L26 48 M34 42 L34 48" stroke="#1b2d8a" stroke-width="3.5" stroke-linecap="round"/></svg>'],
+        // Эфириум
+        ["o4", '<svg viewBox="0 0 60 92"><path d="M30 3 L54 45 L30 58 L6 45 Z" fill="url(#pearlG)" ' + O + '/><path d="M30 3 L30 58 L6 45 Z" fill="#ffffff" opacity=".35"/><path d="M6 45 L30 32 L54 45" fill="none" stroke="#1b2d8a" stroke-width="2"/><path d="M30 3 L30 32" stroke="#1b2d8a" stroke-width="2"/><path d="M30 64 L54 51 L30 89 L6 51 Z" fill="url(#pearlB)" ' + O + '/><path d="M30 64 L30 89 L6 51 Z" fill="#ffffff" opacity=".3"/></svg>']
+      ];
+      var room = '<div class="room"><i class="rf"></i><i class="rw rw1"></i><i class="rw rw2"></i>';
+      objs.forEach(function (o) { room += '<div class="obj ' + o[0] + '"><div class="obj-in">' + o[1] + "</div></div>"; });
+      room += "</div>";
+
+      // Куб 3×3×3 в цветах макета: синие и чёрные грани, мятные рёбра
+      var B = 34, html = "";
+      var BL = "b", BK = "k", MT = "m", LT = "l";
+      function faceColor(x, y, z, f) {
+        if (f === "tp" && y === 0) return (x === 1 && z === 0) ? MT : (x === 2 && z === 0) ? BL : BK;
+        if (f === "ft" && z === 2) return (x === 0 && y === 0) ? LT : (x === 2 && y < 2) ? BK : (x === 1 && y === 2) ? BL : BL;
+        if (f === "rt" && x === 2) return ((z === 0 && y === 1) || (z === 1 && y === 2)) ? BL : BK;
+        return BK;
+      }
+      // Символы валют на синих гранях (перламутровый градиент)
+      var icons = ["₿", "Ξ", "Ł", "Ð", "$", "€", "£", "¥"].map(function (c) { return '<b class="sym">' + c + "</b>"; });
+      var iconIdx = 0;
+      var faces = ["ft", "bk", "rt", "lt", "tp", "bt"];
+      for (var y = 0; y < 3; y++) for (var z = 0; z < 3; z++) for (var x = 0; x < 3; x++) {
+        var vars = "--x:" + (x - 1) * B + "px;--y:" + (y - 1) * B + "px;--z:" + (z - 1) * B + "px;" +
+          "--d:" + (1.75 + (2 - y) * 0.3 + Math.random() * 0.22).toFixed(2) + "s";
+        html += '<div class="blk" style="' + vars + '"><div class="b">';
+        for (var f = 0; f < 6; f++) {
+          var c = faceColor(x, y, z, faces[f]), ic = "";
+          if (c === BL && (faces[f] === "ft" || faces[f] === "rt")) ic = icons[iconIdx++ % icons.length];
+          html += '<i class="f ' + faces[f] + " c-" + c + '">' + ic + "</i>";
+        }
+        html += "</div></div>";
+      }
+      document.getElementById("spCube").innerHTML = room + html;
+
+      var k = Math.min(innerWidth / 380, innerHeight / 520, 2.2);
+      s.style.setProperty("--k", k.toFixed(3));
+      s.style.setProperty("--hole", Math.ceil(Math.hypot(innerWidth, innerHeight) * 1.1) + "px");
+      document.documentElement.classList.add("splashing", "sp-hold");
+      setTimeout(function () { document.documentElement.classList.remove("sp-hold"); }, 4150);
+
+      var done = function () {
+        if (!s.isConnected) return;
+        s.classList.add("out");
+        document.documentElement.classList.remove("splashing", "sp-hold");
+        setTimeout(function () { s.remove(); }, 400);
+      };
+      setTimeout(done, 4950);
+      s.addEventListener("click", done);
+      addEventListener("keydown", done, { once: true });
+    })();
+  </script>
   <header id="topbar">
     <button id="backBtn" class="icon-btn" aria-label="Назад" hidden>‹</button>
     <h1 id="title">Тренировки</h1>
@@ -28,7 +125,6 @@
     <a href="#/settings" data-tab="settings"><span>⚙️</span>Настройки</a>
   </nav>
 
-  <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

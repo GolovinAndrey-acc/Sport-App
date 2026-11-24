@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.3";
+const APP_VERSION = "0.13";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -27,11 +27,11 @@ function setChrome(title, tab, back) {
 
 // ---------- Экраны ----------
 
-function sectionCard(s, wide) {
+function sectionCard(s, wide, i = 0) {
   const n = countExercises(s);
   return `
-    <a class="section-card${wide ? " wide" : ""}" href="#/s/${s.id}">
-      <div class="top">${s.icon}</div>
+    <a class="section-card${wide ? " wide" : ""}" href="#/s/${s.id}" style="--i:${i}">
+      <div class="top"><span class="ico">${s.icon}</span></div>
       <div class="bottom">
         <div class="name">${esc(s.title)}</div>
         <div class="meta"><span class="dot mint"></span>${s.subs.length} подвкладок</div>
@@ -46,9 +46,9 @@ function renderHome() {
   const health = SECTIONS.filter(s => !TRAINING_IDS.includes(s.id));
   view.innerHTML = `
     <div class="group-title">Мышцы</div>
-    <div class="grid">${training.map(s => sectionCard(s)).join("")}</div>
+    <div class="grid">${training.map((s, i) => sectionCard(s, false, i)).join("")}</div>
     <div class="group-title">Здоровье</div>
-    <div class="grid">${health.map(s => sectionCard(s, true)).join("")}</div>
+    <div class="grid">${health.map((s, i) => sectionCard(s, true, training.length + i)).join("")}</div>
   `;
 }
 
