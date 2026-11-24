@@ -22,7 +22,8 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 html {
-  background: #0c0d2b; /* цвет за краями страницы при прокрутке */
+  background: #0c0d2b;
+  color-scheme: dark; /* цвет за краями страницы при прокрутке */
   overscroll-behavior: none;
 }
 html, body {
@@ -374,6 +375,9 @@ html.splashing, html.splashing body { overflow: hidden; }
 html.sp-hold #view * { animation-play-state: paused !important; }
 
 /* ---------- Переходы между экранами (View Transitions) ---------- */
+/* Фон под «снимками» экранов во время перехода — тёмный, а не белый */
+::view-transition { background: #0c0d2b; }
+::view-transition-old(root), ::view-transition-new(root) { background: #0c0d2b; }
 #topbar { view-transition-name: topbar; }
 #tabbar { view-transition-name: tabbar; }
 ::view-transition-group(topbar), ::view-transition-group(tabbar) { animation-duration: .45s; }
