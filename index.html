@@ -171,7 +171,7 @@
       }
       document.addEventListener("visibilitychange", function () {
         if (document.visibilityState === "hidden") hiddenAt = Date.now();
-        else if (hiddenAt && Date.now() - hiddenAt >= 30000) { hiddenAt = 0; replay(); }
+        else if (hiddenAt && Date.now() - hiddenAt >= 60000) { hiddenAt = 0; replay(); }
       });
     })();
   </script>
