@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.32";
+const APP_VERSION = "0.33";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -206,7 +206,7 @@ function onNavigate() {
   const from = lastHash, to = location.hash;
   lastHash = to;
   const sameSection = tabOf(from) === tabOf(to) && depthOf(to) === 1;
-  if (INSTANT || !document.startViewTransition || sameSection || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if ((INSTANT && !forcedDir) || !document.startViewTransition || sameSection || matchMedia("(prefers-reduced-motion: reduce)").matches) {
     forcedDir = null;
     route();
     return;
@@ -246,9 +246,10 @@ function currentTabIndex() {
 function swipeTab(step) {
   if (document.getElementById("splash")) return;
   const inSection = depthOf(location.hash) === 1;
-  if (inSection && step < 0) { navigate("#/"); return; }   // свайп «назад» из раздела
+  if (inSection && step < 0) { forcedDir = "vt-prev"; navigate("#/"); return; }   // свайп «назад» из раздела
   const i = currentTabIndex() + step;
   if (i < 0 || i >= TAB_ORDER.length) return;
+  forcedDir = step > 0 ? "vt-next" : "vt-prev";   // плавный сдвиг только при свайпе
   navigate(TAB_ORDER[i]);
 }
 

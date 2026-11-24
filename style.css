@@ -402,14 +402,18 @@ html.vt-forward::view-transition-new(root) { animation-name: vtInRight; }
 html.vt-back::view-transition-old(root) { animation-name: vtOutRight; z-index: 2; }
 html.vt-back::view-transition-new(root) { animation-name: vtInLeft; }
 /* Свайп к следующей вкладке: новая выезжает справа, старая уходит влево (и наоборот) */
+html.vt-next::view-transition-old(root), html.vt-next::view-transition-new(root),
+html.vt-prev::view-transition-old(root), html.vt-prev::view-transition-new(root) {
+  animation-duration: .28s; animation-timing-function: cubic-bezier(.2, .8, .2, 1);
+}
 html.vt-next::view-transition-old(root) { animation-name: vtSwOutL; }
 html.vt-next::view-transition-new(root) { animation-name: vtSwInR; }
 html.vt-prev::view-transition-old(root) { animation-name: vtSwOutR; }
 html.vt-prev::view-transition-new(root) { animation-name: vtSwInL; }
 @keyframes vtSwInR  { from { transform: translateX(100%); } to { transform: none; } }
-@keyframes vtSwOutL { to { transform: translateX(-100%); } }
+@keyframes vtSwOutL { to { transform: translateX(-35%); opacity: 0; } }
 @keyframes vtSwInL  { from { transform: translateX(-100%); } to { transform: none; } }
-@keyframes vtSwOutR { to { transform: translateX(100%); } }
+@keyframes vtSwOutR { to { transform: translateX(35%); opacity: 0; } }
 /* Между вкладками нижней панели: мягкое проявление с подъёмом */
 html.vt-tab::view-transition-old(root) { animation: vtFadeDown .2s ease-in both; }
 html.vt-tab::view-transition-new(root) { animation: vtFadeUp .2s cubic-bezier(.25, .8, .25, 1) both; }
