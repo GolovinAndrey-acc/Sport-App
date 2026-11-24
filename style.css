@@ -401,6 +401,15 @@ html.vt-forward::view-transition-new(root) { animation-name: vtInRight; }
 /* Назад: наоборот */
 html.vt-back::view-transition-old(root) { animation-name: vtOutRight; z-index: 2; }
 html.vt-back::view-transition-new(root) { animation-name: vtInLeft; }
+/* Свайп к следующей вкладке: новая выезжает справа, старая уходит влево (и наоборот) */
+html.vt-next::view-transition-old(root) { animation-name: vtSwOutL; }
+html.vt-next::view-transition-new(root) { animation-name: vtSwInR; }
+html.vt-prev::view-transition-old(root) { animation-name: vtSwOutR; }
+html.vt-prev::view-transition-new(root) { animation-name: vtSwInL; }
+@keyframes vtSwInR  { from { transform: translateX(100%); } to { transform: none; } }
+@keyframes vtSwOutL { to { transform: translateX(-100%); } }
+@keyframes vtSwInL  { from { transform: translateX(-100%); } to { transform: none; } }
+@keyframes vtSwOutR { to { transform: translateX(100%); } }
 /* Между вкладками нижней панели: мягкое проявление с подъёмом */
 html.vt-tab::view-transition-old(root) { animation: vtFadeDown .3s ease-in both; }
 html.vt-tab::view-transition-new(root) { animation: vtFadeUp .5s .05s cubic-bezier(.22, 1, .36, 1) both; }
