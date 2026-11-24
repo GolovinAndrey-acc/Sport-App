@@ -134,7 +134,7 @@
       }
       document.addEventListener("visibilitychange", function () {
         if (document.visibilityState === "hidden") hiddenAt = Date.now();
-        else if (hiddenAt && Date.now() - hiddenAt >= 5000) replay();
+        else if (hiddenAt && Date.now() - hiddenAt >= 30000) replay();
       });
       addEventListener("pageshow", function (e) { if (e.persisted) replay(); });
     })();
