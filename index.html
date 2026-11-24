@@ -140,22 +140,39 @@
       addEventListener("keydown", done);
       }
 
-      play(first);
+      var lastPlay = 0;
+      function start(s, wait) {
+        lastPlay = Date.now();
+        play(s, wait);
+      }
 
-      // Вернулись в приложение (свернули и открыли снова) — заставка заново
+      // Если страница загрузилась в фоне (например, обновление), заставку держим до момента, когда её увидят
+      if (document.visibilityState === "hidden") {
+        first.classList.add("sp-wait");
+        document.addEventListener("visibilitychange", function onShow() {
+          if (document.visibilityState !== "visible") return;
+          document.removeEventListener("visibilitychange", onShow);
+          first.classList.remove("sp-wait");
+          start(first, 0);
+        });
+      } else {
+        start(first, 0);
+      }
+
+      // Вернулись в приложение (свернули и открыли снова) — заставка заново, но только один раз
       var hiddenAt = 0;
       function replay() {
+        if (Date.now() - lastPlay < 3000) return;          // защита от двойного запуска
         var old = document.getElementById("splash");
         if (old) old.remove();
         var s = template.cloneNode(true);
         document.body.insertBefore(s, document.body.firstChild);
-        play(s, 750);
+        start(s, 750);
       }
       document.addEventListener("visibilitychange", function () {
         if (document.visibilityState === "hidden") hiddenAt = Date.now();
-        else if (hiddenAt && Date.now() - hiddenAt >= 30000) replay();
+        else if (hiddenAt && Date.now() - hiddenAt >= 30000) { hiddenAt = 0; replay(); }
       });
-      addEventListener("pageshow", function (e) { if (e.persisted) replay(); });
     })();
   </script>
   <header id="topbar">
