@@ -32,9 +32,13 @@ html, body {
   font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+/* Своя область прокрутки: страница целиком не двигается, листается только содержимое между
+   верхней и нижней панелями. Так прокрутка тачпадом работает в Safari на Mac, как на обычном сайте. */
+html, body { height: 100%; overflow: hidden; }
 body {
   background: transparent;
-  min-height: 100vh;
+  display: flex; flex-direction: column;
+  height: 100vh; height: 100dvh;
 }
 /* Фон закреплён за экраном — на iPhone background-attachment: fixed не работает */
 body::before {
@@ -44,7 +48,7 @@ body::before {
 }
 
 #topbar {
-  position: sticky; top: 0; z-index: 10;
+  position: relative; z-index: 10; flex: 0 0 auto;
   display: flex; align-items: center; gap: 10px;
   padding: calc(14px + var(--top)) 18px 14px;
   background: rgba(14, 15, 46, 0.78);
@@ -61,7 +65,11 @@ body::before {
 }
 .icon-btn:active { transform: scale(.92); }
 
-#view { padding: 18px 16px calc(110px + var(--bottom)); max-width: 640px; margin: 0 auto; }
+#view {
+  flex: 1 1 auto; min-height: 0; width: 100%;
+  overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
+  padding: 18px max(16px, calc((100% - 608px) / 2)) calc(110px + var(--bottom));
+}
 
 /* ---------- Плавные переходы ---------- */
 @keyframes viewIn {

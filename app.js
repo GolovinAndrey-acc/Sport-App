@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.39";
+const APP_VERSION = "0.40";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -22,7 +22,7 @@ function setChrome(title, tab, back) {
   backBtn.hidden = !back;
   backBtn.onclick = back ? () => navigate(back) : null;
   document.querySelectorAll("#tabbar a").forEach(a => a.classList.toggle("active", a.dataset.tab === tab));
-  window.scrollTo({ top: 0 });
+  view.scrollTop = 0;
 }
 
 // ---------- Экраны ----------
