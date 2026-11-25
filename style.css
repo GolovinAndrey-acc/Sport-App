@@ -215,7 +215,8 @@ html.cards-roll #view.enter > * { animation: viewIn .38s var(--ease) both; }
 }
 @keyframes splashBgOff { to { background: transparent; } }
 #splash.out { opacity: 0; pointer-events: none; }
-html.splashing, html.splashing body { overflow: hidden; }
+/* Прокрутка блокируется только пока заставка реально на экране — залипнуть не может */
+html:has(#splash:not(.out)), html:has(#splash:not(.out)) body { overflow: hidden; }
 
 #splash .sp-hole {
   position: absolute; width: 0; height: 0; border-radius: 50%;

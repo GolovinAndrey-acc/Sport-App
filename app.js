@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.36";
+const APP_VERSION = "0.37";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -170,6 +170,7 @@ function renderSettings() {
 // ---------- Навигация ----------
 
 function route() {
+  if (!document.getElementById("splash")) document.documentElement.classList.remove("splashing", "sp-hold");
   const parts = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
   let mode;
   if (parts[0] === "s") mode = renderSection(parts[1], parts[2]);
@@ -257,7 +258,8 @@ function swipeTab(step) {
 // игнорируется, но новый свайп распознаётся сразу — по резкому росту силы движения или смене направления.
 let wheelAcc = 0, wheelLast = 0, gestureUsed = false, lastAbs = 0, lastDir = 0, lastFire = 0;
 window.addEventListener("wheel", e => {
-  if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+  // Только явно горизонтальный жест; обычная прокрутка вниз/вверх не трогается
+  if (Math.abs(e.deltaX) < 3 || Math.abs(e.deltaX) <= Math.abs(e.deltaY) * 2) return;
   e.preventDefault();                                   // не даём браузеру показать белый экран «назад»
   const chips = e.target.closest && e.target.closest(".chips");
   if (chips) { chips.scrollLeft += e.deltaX; return; }  // ряд подвкладок листается как обычно
