@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.37";
+const APP_VERSION = "0.38";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -257,17 +257,26 @@ function swipeTab(step) {
 // Трекпад: срабатывает сразу в начале жеста. Инерция (затухающие события после свайпа)
 // игнорируется, но новый свайп распознаётся сразу — по резкому росту силы движения или смене направления.
 let wheelAcc = 0, wheelLast = 0, gestureUsed = false, lastAbs = 0, lastDir = 0, lastFire = 0;
+let axis = null, axX = 0, axY = 0;   // направление текущего жеста: "x" — свайп вкладок, "y" — обычная прокрутка
 window.addEventListener("wheel", e => {
-  // Только явно горизонтальный жест; обычная прокрутка вниз/вверх не трогается
-  if (Math.abs(e.deltaX) < 3 || Math.abs(e.deltaX) <= Math.abs(e.deltaY) * 2) return;
-  e.preventDefault();                                   // не даём браузеру показать белый экран «назад»
+  const now = performance.now();
+  if (now - wheelLast > 120) { axis = null; axX = 0; axY = 0; wheelAcc = 0; gestureUsed = false; }   // новый жест
+  wheelLast = now;
+
+  // Сначала понимаем, куда движутся пальцы. Пока не ясно — ничего не блокируем, прокрутка идёт как обычно.
+  if (!axis) {
+    axX += Math.abs(e.deltaX); axY += Math.abs(e.deltaY);
+    if (axX + axY < 6) return;
+    axis = axX > axY * 2 ? "x" : "y";
+  }
+  if (axis === "y") return;            // вертикальный жест — это прокрутка страницы, не трогаем
+
+  e.preventDefault();                  // горизонтальный жест — не даём браузеру показать белый экран «назад»
   const chips = e.target.closest && e.target.closest(".chips");
-  if (chips) { chips.scrollLeft += e.deltaX; return; }  // ряд подвкладок листается как обычно
-  const now = performance.now(), abs = Math.abs(e.deltaX), dir = Math.sign(e.deltaX);
-  const pause = now - wheelLast > 100;
-  const newPush = gestureUsed && now - lastFire > 180 && (dir !== lastDir || abs > lastAbs * 1.6 + 3);
-  if (pause || newPush) { wheelAcc = 0; gestureUsed = false; }
-  wheelLast = now; lastAbs = abs;
+  if (chips) { chips.scrollLeft += e.deltaX; return; }
+  const abs = Math.abs(e.deltaX), dir = Math.sign(e.deltaX);
+  if (gestureUsed && now - lastFire > 180 && dir && (dir !== lastDir || abs > lastAbs * 1.6 + 3)) { wheelAcc = 0; gestureUsed = false; }
+  lastAbs = abs;
   if (gestureUsed) return;
   wheelAcc += e.deltaX;
   if (Math.abs(wheelAcc) > 18) {
