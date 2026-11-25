@@ -24,8 +24,6 @@
 html {
   background: #0c0d2b;
   color-scheme: dark; /* цвет за краями страницы при прокрутке */
-  overscroll-behavior: none;
-  overscroll-behavior-x: none;
 }
 html, body {
   margin: 0;
@@ -37,7 +35,6 @@ html, body {
 body {
   background: transparent;
   min-height: 100vh;
-  overscroll-behavior: none;
 }
 /* Фон закреплён за экраном — на iPhone background-attachment: fixed не работает */
 body::before {
