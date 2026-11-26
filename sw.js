@@ -1,6 +1,6 @@
 // Service worker: приложение открывается мгновенно из сохранённой копии,
 // а свежая версия с GitHub тихо скачивается в фоне и показывается при следующем открытии.
-const CACHE = "sport-v52";
+const CACHE = "sport-v53";
 const FILES = ["./", "index.html", "style.css", "app.js", "data.js", "manifest.json"];
 
 self.addEventListener("install", e => {
@@ -21,7 +21,7 @@ self.addEventListener("fetch", e => {
   if (req.method !== "GET" || url.origin !== location.origin) return;
   // Иконку и manifest никогда не берём из сохранённой копии — всегда свежие с сервера,
   // иначе iPhone и Mac при установке получают старую иконку
-  if (/icon\.png$|manifest\.json$/.test(url.pathname)) return;
+  if (/icon\.png$|manifest\.json$|\/videos\//.test(url.pathname)) return;   // видео — всегда напрямую с сервера
   const key = req.mode === "navigate" ? "index.html" : req;
 
   e.respondWith(
