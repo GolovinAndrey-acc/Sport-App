@@ -452,7 +452,7 @@ html.vt-tab::view-transition-new(root) { animation: vtFadeUp .2s cubic-bezier(.2
 /* Упражнения в ряд по горизонтали, карточки сразу раскрыты */
 .ex-row {
   display: flex; gap: 14px; align-items: flex-start;
-  overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
   /* на широком экране ряд растягивается на всю ширину окна */
   --padx: max(16px, calc((100vw - 608px) / 2));
   margin: 0 calc(-1 * var(--padx)); padding: 2px var(--padx) 14px; scroll-padding-left: var(--padx);
@@ -460,3 +460,24 @@ html.vt-tab::view-transition-new(root) { animation: vtFadeUp .2s cubic-bezier(.2
 }
 .ex-row .ex { flex: 0 0 min(340px, 84vw); margin-bottom: 0; scroll-snap-align: start; }
 .ex .ex-head { cursor: default; }
+
+/* Ползунок под рядом упражнений */
+.ex-nav { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; padding: 6px 0; position: sticky; top: -18px; z-index: 5; background: linear-gradient(180deg, #11123a 70%, rgba(17,18,58,0)); }
+.ex-arrow {
+  flex: 0 0 auto; width: 38px; height: 38px; border-radius: 12px;
+  background: var(--card); border: 1px solid var(--line); color: var(--text);
+  font-size: 24px; line-height: 1; padding-bottom: 3px; cursor: pointer;
+}
+.ex-arrow:active { transform: scale(.94); }
+.ex-slider {
+  flex: 1; -webkit-appearance: none; appearance: none; height: 8px; border-radius: 999px; outline: none; cursor: pointer;
+  background: linear-gradient(90deg, var(--mint-soft), var(--blue-soft)) 0 0 / var(--p, 0%) 100% no-repeat, var(--card2);
+}
+.ex-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--blue-soft); box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+.ex-slider::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--blue-soft); }
+
+/* На телефоне карточка после свайпа встаёт ровно; на Mac прокрутка свободная, без «прилипания» */
+@media (pointer: coarse) { .ex-row { scroll-snap-type: x mandatory; } }

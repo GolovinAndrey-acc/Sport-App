@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.55";
+const APP_VERSION = "0.56";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -90,6 +90,34 @@ function exerciseCard(ex) {
 
 let currentSection = null;
 
+// Ползунок и стрелки под рядом упражнений
+function setupRow() {
+  const row = document.querySelector(".ex-row"), slider = document.querySelector(".ex-slider");
+  if (!row || !slider) return;
+  const max = () => Math.max(1, row.scrollWidth - row.clientWidth);
+  let fromSlider = false;
+  const sync = () => {
+    if (fromSlider) return;
+    slider.value = Math.round(row.scrollLeft / max() * 1000);
+    slider.style.setProperty("--p", slider.value / 10 + "%");
+  };
+  row.addEventListener("scroll", sync, { passive: true });
+  slider.addEventListener("input", () => {
+    fromSlider = true;
+    row.style.scrollSnapType = "none";
+    row.scrollLeft = slider.value / 1000 * max();
+    slider.style.setProperty("--p", slider.value / 10 + "%");
+  });
+  const release = () => { fromSlider = false; row.style.scrollSnapType = ""; };
+  slider.addEventListener("change", release);
+  slider.addEventListener("pointerup", release);
+  document.querySelectorAll(".ex-arrow").forEach(b => b.onclick = () => {
+    const card = row.querySelector(".ex");
+    row.scrollBy({ left: (+b.dataset.dir) * ((card?.offsetWidth || 300) + 14), behavior: "smooth" });
+  });
+  sync();
+}
+
 function renderSection(sectionId, subId, opt = {}) {
   const s = sectionId === "anatomy" ? ANATOMY : SECTIONS.find(x => x.id === sectionId);
   if (!s) return renderHome();
@@ -97,7 +125,10 @@ function renderSection(sectionId, subId, opt = {}) {
   const sub = s.subs.find(x => x.id === subId) || s.subs[0];
 
   const list = sub.exercises?.length
-    ? `<div class="ex-row">${sub.exercises.map(exerciseCard).join("")}</div>`
+    ? (sub.exercises.length > 1 ? `<div class="ex-nav"><button class="ex-arrow" data-dir="-1" aria-label="Назад">‹</button>
+         <input class="ex-slider" type="range" min="0" max="1000" value="0" aria-label="Прокрутка упражнений">
+         <button class="ex-arrow" data-dir="1" aria-label="Вперёд">›</button></div>` : "") +
+      `<div class="ex-row">${sub.exercises.map(exerciseCard).join("")}</div>`
     : `<div class="empty"><div class="big">${s.icon}</div>«${esc(sub.title)}»: ${s.id === "anatomy" ? "описание появится позже" : "упражнения появятся позже"}</div>`;
 
   // Смена подвкладки внутри того же раздела — меняем только список, без перерисовки экрана
@@ -107,6 +138,7 @@ function renderSection(sectionId, subId, opt = {}) {
     document.querySelector(".chip.active")?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
     listEl.innerHTML = list;
     listEl.classList.remove("swap"); void listEl.offsetWidth; listEl.classList.add("swap");
+    setupRow();
     return "keep";
   }
 
@@ -120,6 +152,7 @@ function renderSection(sectionId, subId, opt = {}) {
     <div id="list">${list}</div>
   `;
   currentSection = s.id;
+  setupRow();
   document.querySelector(".chip.active")?.scrollIntoView({ inline: "center", block: "nearest" });
   return "forward";
 }
@@ -284,9 +317,10 @@ window.addEventListener("wheel", e => {
   }
   if (axis === "y") return;            // вертикальный жест — это прокрутка страницы, не трогаем
 
+  const chips = e.target.closest && e.target.closest(".chips, .ex-row, .ex-nav");
+  if (chips) return;                   // ряды листаются сами, нативно
   e.preventDefault();                  // горизонтальный жест — не даём браузеру показать белый экран «назад»
-  const chips = e.target.closest && e.target.closest(".chips, .ex-row");
-  if (chips) { chips.scrollLeft += e.deltaX; return; }
+
   const abs = Math.abs(e.deltaX), dir = Math.sign(e.deltaX);
   if (gestureUsed && now - lastFire > 180 && dir && (dir !== lastDir || abs > lastAbs * 1.6 + 3)) { wheelAcc = 0; gestureUsed = false; }
   lastAbs = abs;
