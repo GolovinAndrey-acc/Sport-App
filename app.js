@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.47";
+const APP_VERSION = "0.48";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -34,8 +34,6 @@ function sectionCard(s, wide, i = 0) {
       <div class="top"><span class="ico">${s.icon}</span></div>
       <div class="bottom">
         <div class="name">${esc(s.title)}</div>
-        <div class="meta"><span class="dot mint"></span>${s.subs.length} подвкладок</div>
-        <div class="meta"><span class="dot blue"></span>${n ? n + " упражнений" : "пока пусто"}</div>
       </div>
     </a>`;
 }
@@ -105,7 +103,6 @@ function renderSection(sectionId, subId) {
 
   view.innerHTML = `
     <div class="chips">${chips}</div>
-    ${s.note ? `<div class="note">⚠️ ${esc(s.note)}</div>` : ""}
     <div id="list">${list}</div>
   `;
   currentSection = s.id;
