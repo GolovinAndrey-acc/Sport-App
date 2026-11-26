@@ -6,15 +6,15 @@
   <title>Спорт</title>
   <meta name="theme-color" content="#0c0d2b">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon.png?v=c47c52b9">
-  <link rel="apple-touch-icon" href="icon.png?v=c47c52b9">
+  <link rel="icon" href="icon.png?v=0d759d7c">
+  <link rel="apple-touch-icon" href="icon.png?v=0d759d7c">
   <script>
     // На Mac — иконка без белой плашки (прозрачный фон), как у обычных программ в Dock
     (function () {
       var mac = /Mac/.test(navigator.platform) && navigator.maxTouchPoints === 0;
       if (!mac) return;
       document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]').forEach(function (l) {
-        l.setAttribute("href", l.getAttribute("href").replace("icon.png", "icon-mac.png"));
+        l.setAttribute("href", l.getAttribute("href").replace("icon.png?v=0d759d7c", "icon-mac.png"));
       });
     })();
   </script>
