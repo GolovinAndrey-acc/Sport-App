@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - icon.png
+      - .github/scripts/fix_icon.py
   workflow_dispatch:
 
 permissions:
