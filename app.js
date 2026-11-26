@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.52";
+const APP_VERSION = "0.53";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -57,6 +57,12 @@ function exerciseCard(ex) {
     ex.rest && `Отдых: ${esc(ex.rest)}`,
   ].filter(Boolean).map(t => `<span class="tag">${t}</span>`).join("");
 
+  const mg = (ex.main?.length || ex.extra?.length)
+    ? `<h4>Какие мышцы работают</h4><div class="mg">` +
+      (ex.main || []).map(m => `<span class="mtag main">${esc(m)}</span>`).join("") +
+      (ex.extra || []).map(m => `<span class="mtag extra">${esc(m)}</span>`).join("") +
+      `</div><div class="mg-legend"><span class="dot mint"></span>основные <span class="dot grey"></span>помогают</div>`
+    : "";
   const tech = Array.isArray(ex.technique) && ex.technique.length
     ? `<h4>Техника</h4><ol>${ex.technique.map(t => `<li>${esc(t)}</li>`).join("")}</ol>` : "";
   const prog = ex.progression ? `<h4>Когда увеличивать нагрузку</h4><p>${esc(ex.progression)}</p>` : "";
@@ -65,10 +71,11 @@ function exerciseCard(ex) {
   // Если файла нет — блок с видео просто не появляется.
   const vsrc = ex.video || (ex.id ? `videos/${ex.id}.mp4` : "");
   const vid = vsrc
-    ? `<div class="ex-vwrap" hidden><h4>Видео</h4><video class="ex-video" src="${esc(vsrc)}" muted loop playsinline autoplay controls preload="metadata"
+    ? `<div class="ex-vwrap" hidden><h4>Видео</h4><video class="ex-video" src="${esc(vsrc)}" muted loop playsinline autoplay controls preload="auto"
+         onended="this.currentTime=0;this.play()"
          onloadeddata="this.parentNode.hidden=false" onerror="this.parentNode.remove()"></video></div>`
     : "";
-  const body = tech + prog + safe + vid;
+  const body = vid + mg + tech + prog + safe;
 
   return `
     <details class="ex">
