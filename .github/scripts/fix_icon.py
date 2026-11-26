@@ -5,13 +5,13 @@
 - ставит рисунок по центру с отступом и делает ровно 1024×1024 на полностью белом фоне.
 Углы скругляют сами iPhone и Mac. Уже обработанный файл повторно не трогается."""
 import sys
-from PIL import Image, ImageChops, ImageDraw
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 from PIL.PngImagePlugin import PngInfo
 
 BG = (255, 255, 255)   # цвет фона
 MARGIN = 0.10          # отступ от края с каждой стороны (10%) — как у иконки со щитом
 SIZE = 1024
-MARK = "processed-v2"
+MARK = "processed-v3"
 PATH = sys.argv[1] if len(sys.argv) > 1 else "icon.png"
 
 
@@ -21,6 +21,8 @@ def near(a, b, tol=40):
 
 def trim(im):
     mask = ImageChops.difference(im, Image.new("RGB", im.size, BG)).convert("L").point(lambda v: 255 if v > 18 else 0)
+    # тонкие линии (сглаженные края бывшей рамки) не считаем рисунком
+    mask = mask.filter(ImageFilter.MinFilter(5)).filter(ImageFilter.MaxFilter(5))
     box = mask.getbbox()
     return im.crop(box) if box else im
 
@@ -36,15 +38,37 @@ base = Image.new("RGBA", im.size, BG + (255,))
 base.alpha_composite(im)
 im = base.convert("RGB")
 
-# 2. Снимаем рамки слоями: если все четыре угла одного «не белого» цвета (чёрный фон,
-#    тёмная рамка, уголки вокруг скруглённой плашки) — это фон, заливаем его белым от краёв
-for _ in range(4):
-    im = trim(im)
+# 2. Снимаем рамки слоями. Рамка — это полоса одного цвета вдоль края картинки
+#    (чёрный фон, тёмный скруглённый квадрат, уголки вокруг белой плашки).
+#    Её заливаем белым от края и снова обрезаем пустые поля. Фото, которое касается
+#    края, не трогаем — вдоль края у него разные цвета.
+def edge_frames(im):
     w, h = im.size
-    corners = [im.getpixel(p) for p in [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)]]
-    if near(corners[0], BG, 12) or not all(near(c, corners[0], 30) for c in corners):
+    edges = {
+        "top": [(x, 0) for x in range(int(w * .15), int(w * .85))],
+        "bottom": [(x, h - 1) for x in range(int(w * .15), int(w * .85))],
+        "left": [(0, y) for y in range(int(h * .15), int(h * .85))],
+        "right": [(w - 1, y) for y in range(int(h * .15), int(h * .85))],
+    }
+    seeds = []
+    for pts in edges.values():
+        if not pts:
+            continue
+        cols = [im.getpixel(p) for p in pts]
+        mid = cols[len(cols) // 2]
+        if near(mid, BG, 12):
+            continue
+        same = sum(1 for c in cols if near(c, mid, 30)) / len(cols)
+        if same >= 0.9:
+            seeds.append(pts[len(pts) // 2])
+    return seeds
+
+for _ in range(6):
+    im = trim(im)
+    seeds = edge_frames(im)
+    if not seeds:
         break
-    for p in [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)]:
+    for p in seeds:
         ImageDraw.floodfill(im, p, BG, thresh=40)
 im = trim(im)
 
