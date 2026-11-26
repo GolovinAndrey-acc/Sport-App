@@ -103,13 +103,3 @@ info = PngInfo()
 info.add_text("sport-icon", MARK)
 out.save(PATH, "PNG", pnginfo=info, optimize=True)
 
-# 5. Версия для Mac: тот же рисунок, но без белой плашки — фон прозрачный (как у иконок обычных программ)
-mac = out.copy()
-_, bgmask = whiten_background(mac, thresh=55)
-alpha = ImageChops.invert(bgmask).filter(ImageFilter.GaussianBlur(0.8))
-mac_rgba = out.convert("RGBA")
-mac_rgba.putalpha(alpha)
-mac_path = PATH.replace("icon.png", "icon-mac.png") if PATH.endswith("icon.png") else PATH + ".mac.png"
-mac_rgba.save(mac_path, "PNG", pnginfo=info, optimize=True)
-print(f"Версия для Mac: {mac_path} (прозрачный фон)")
-print(f"Готово: {PATH} → {SIZE}×{SIZE}, белый фон, рамки убраны, поля обрезаны")
