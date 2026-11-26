@@ -1,0 +1,39 @@
+name: Обработка иконки
+
+# Запускается сам, когда в репозиторий загружают новый icon.png
+on:
+  push:
+    paths:
+      - icon.png
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-icon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Установить Pillow
+        run: pip install pillow
+
+      - name: Привести icon.png в порядок
+        run: python .github/scripts/fix_icon.py icon.png
+
+      - name: Сохранить исправленную иконку
+        run: |
+          if git diff --quiet -- icon.png; then
+            echo "Изменений нет"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add icon.png
+          git commit -m "Иконка автоматически приведена в порядок"
+          git push
