@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.48";
+const APP_VERSION = "0.49";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -77,14 +77,15 @@ function exerciseCard(ex) {
 
 let currentSection = null;
 
-function renderSection(sectionId, subId) {
-  const s = SECTIONS.find(x => x.id === sectionId);
+function renderSection(sectionId, subId, opt = {}) {
+  const s = sectionId === "anatomy" ? ANATOMY : SECTIONS.find(x => x.id === sectionId);
   if (!s) return renderHome();
+  const base = opt.base || `#/s/${s.id}`;
   const sub = s.subs.find(x => x.id === subId) || s.subs[0];
 
   const list = sub.exercises?.length
     ? sub.exercises.map(exerciseCard).join("")
-    : `<div class="empty"><div class="big">${s.icon}</div>«${esc(sub.title)}»: упражнения появятся позже</div>`;
+    : `<div class="empty"><div class="big">${s.icon}</div>«${esc(sub.title)}»: ${s.id === "anatomy" ? "описание появится позже" : "упражнения появятся позже"}</div>`;
 
   // Смена подвкладки внутри того же раздела — меняем только список, без перерисовки экрана
   const listEl = document.getElementById("list");
@@ -96,9 +97,9 @@ function renderSection(sectionId, subId) {
     return "keep";
   }
 
-  setChrome(s.title, "home", "#/");
+  setChrome(s.title, opt.tab || "home", opt.back === undefined ? "#/" : opt.back);
   const chips = s.subs.map(x =>
-    `<a class="chip${x.id === sub.id ? " active" : ""}" data-sub="${x.id}" href="#/s/${s.id}/${x.id}">${esc(x.title)}</a>`
+    `<a class="chip${x.id === sub.id ? " active" : ""}" data-sub="${x.id}" href="${base}/${x.id}">${esc(x.title)}</a>`
   ).join("");
 
   view.innerHTML = `
@@ -171,6 +172,7 @@ function route() {
   const parts = location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
   let mode;
   if (parts[0] === "s") mode = renderSection(parts[1], parts[2]);
+  else if (parts[0] === "anatomy") { mode = renderSection("anatomy", parts[1], { base: "#/anatomy", tab: "anatomy", back: null }); if (mode === "forward") mode = null; }
   else {
     currentSection = null;
     if (parts[0] === "nutrition") renderNutrition();
@@ -234,11 +236,12 @@ route();
 
 // ---------- Свайп между вкладками (трекпад Mac и телефон) ----------
 // Системный жест «назад» с белым экраном заблокирован — вместо него листаются вкладки.
-const TAB_ORDER = ["#/", "#/nutrition", "#/settings"];
+const TAB_ORDER = ["#/", "#/anatomy", "#/nutrition", "#/settings"];
 function currentTabIndex() {
   const h = location.hash || "#/";
-  if (h.startsWith("#/nutrition")) return 1;
-  if (h.startsWith("#/settings")) return 2;
+  if (h.startsWith("#/anatomy")) return 1;
+  if (h.startsWith("#/nutrition")) return 2;
+  if (h.startsWith("#/settings")) return 3;
   return 0;
 }
 function swipeTab(step) {

@@ -88,3 +88,17 @@ const SECTIONS = [
     ],
   },
 ];
+
+// Вкладка «Анатомия» (нижняя панель): подвкладки по группам мышц и суставам.
+// Сюда позже добавим описания мышц — поле exercises используется как список карточек.
+const ANATOMY = {
+  id: "anatomy", title: "Анатомия", icon: "🫀",
+  subs: [
+    { id: "legs",   title: "Ноги",               exercises: [] },
+    { id: "arms",   title: "Руки и плечи",       exercises: [] },
+    { id: "back",   title: "Спина",              exercises: [] },
+    { id: "chest",  title: "Грудь",              exercises: [] },
+    { id: "core",   title: "Кор и пресс",        exercises: [] },
+    { id: "joints", title: "Суставы и связки",   exercises: [] },
+  ],
+};
