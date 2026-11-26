@@ -27,14 +27,20 @@ jobs:
       - name: Привести icon.png в порядок
         run: python .github/scripts/fix_icon.py icon.png
 
+      - name: Новая ссылка на иконку (чтобы iPhone и Mac не брали старую из кэша)
+        run: |
+          V=$(sha1sum icon.png | cut -c1-8)
+          sed -i -E "s#icon\.png(\?v=[a-f0-9]+)?\"#icon.png?v=$V\"#g" index.html manifest.json
+          grep -n "icon.png" index.html manifest.json
+
       - name: Сохранить исправленную иконку
         run: |
-          if git diff --quiet -- icon.png; then
+          if git diff --quiet -- icon.png index.html manifest.json; then
             echo "Изменений нет"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add icon.png
+          git add icon.png index.html manifest.json
           git commit -m "Иконка автоматически приведена в порядок"
           git push
