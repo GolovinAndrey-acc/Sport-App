@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.54";
+const APP_VERSION = "0.55";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -78,14 +78,14 @@ function exerciseCard(ex) {
   const body = vid + mg + tech + prog + safe;
 
   return `
-    <details class="ex">
-      <summary>
+    <article class="ex">
+      <div class="ex-head">
         <div class="ex-name">${esc(ex.name)}</div>
         ${ex.muscles ? `<div class="ex-muscles">${esc(ex.muscles)}</div>` : ""}
         ${tags ? `<div class="ex-tags">${tags}</div>` : ""}
-      </summary>
+      </div>
       ${body ? `<div class="ex-body">${body}</div>` : ""}
-    </details>`;
+    </article>`;
 }
 
 let currentSection = null;
@@ -97,7 +97,7 @@ function renderSection(sectionId, subId, opt = {}) {
   const sub = s.subs.find(x => x.id === subId) || s.subs[0];
 
   const list = sub.exercises?.length
-    ? sub.exercises.map(exerciseCard).join("")
+    ? `<div class="ex-row">${sub.exercises.map(exerciseCard).join("")}</div>`
     : `<div class="empty"><div class="big">${s.icon}</div>«${esc(sub.title)}»: ${s.id === "anatomy" ? "описание появится позже" : "упражнения появятся позже"}</div>`;
 
   // Смена подвкладки внутри того же раздела — меняем только список, без перерисовки экрана
@@ -285,7 +285,7 @@ window.addEventListener("wheel", e => {
   if (axis === "y") return;            // вертикальный жест — это прокрутка страницы, не трогаем
 
   e.preventDefault();                  // горизонтальный жест — не даём браузеру показать белый экран «назад»
-  const chips = e.target.closest && e.target.closest(".chips");
+  const chips = e.target.closest && e.target.closest(".chips, .ex-row");
   if (chips) { chips.scrollLeft += e.deltaX; return; }
   const abs = Math.abs(e.deltaX), dir = Math.sign(e.deltaX);
   if (gestureUsed && now - lastFire > 180 && dir && (dir !== lastDir || abs > lastAbs * 1.6 + 3)) { wheelAcc = 0; gestureUsed = false; }
@@ -302,7 +302,7 @@ window.addEventListener("wheel", e => {
 let tx = 0, ty = 0, tOk = false;
 window.addEventListener("touchstart", e => {
   const t = e.touches[0]; tx = t.clientX; ty = t.clientY;
-  tOk = e.touches.length === 1 && !(e.target.closest && e.target.closest(".chips"));
+  tOk = e.touches.length === 1 && !(e.target.closest && e.target.closest(".chips, .ex-row"));
 }, { passive: true });
 window.addEventListener("touchmove", e => {
   if (!tOk) return;
