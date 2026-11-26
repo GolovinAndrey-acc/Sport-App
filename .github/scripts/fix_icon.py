@@ -11,7 +11,7 @@ from PIL.PngImagePlugin import PngInfo
 BG = (255, 255, 255)   # цвет фона
 MARGIN = 0.10          # отступ от края с каждой стороны (10%) — как у иконки со щитом
 SIZE = 1024
-MARK = "processed-v3"
+MARK = "processed-v4"
 PATH = sys.argv[1] if len(sys.argv) > 1 else "icon.png"
 
 
@@ -63,6 +63,22 @@ def edge_frames(im):
             seeds.append(pts[len(pts) // 2])
     return seeds
 
+SENT = (255, 0, 254)
+
+
+def whiten_background(im, thresh=55):
+    """Всё почти-белое, что связано с краями (бывшая плашка, её тень, серые края), делаем чисто белым."""
+    w, h = im.size
+    pts = [(x, 0) for x in range(0, w, 6)] + [(x, h - 1) for x in range(0, w, 6)] + \
+          [(0, y) for y in range(0, h, 6)] + [(w - 1, y) for y in range(0, h, 6)]
+    for p in pts:
+        if near(im.getpixel(p), BG, thresh) and im.getpixel(p) != SENT:
+            ImageDraw.floodfill(im, p, SENT, thresh=thresh)
+    m = ImageChops.difference(im, Image.new("RGB", im.size, SENT)).convert("L").point(lambda v: 255 if v < 6 else 0)
+    im.paste(Image.new("RGB", im.size, BG), (0, 0), m)
+    return im, m
+
+
 for _ in range(6):
     im = trim(im)
     seeds = edge_frames(im)
@@ -70,6 +86,9 @@ for _ in range(6):
         break
     for p in seeds:
         ImageDraw.floodfill(im, p, BG, thresh=40)
+im = trim(im)
+
+im, _ = whiten_background(im)
 im = trim(im)
 
 # 3. Квадрат с отступом, рисунок по центру
@@ -83,4 +102,14 @@ out = canvas.resize((SIZE, SIZE), Image.LANCZOS)
 info = PngInfo()
 info.add_text("sport-icon", MARK)
 out.save(PATH, "PNG", pnginfo=info, optimize=True)
+
+# 5. Версия для Mac: тот же рисунок, но без белой плашки — фон прозрачный (как у иконок обычных программ)
+mac = out.copy()
+_, bgmask = whiten_background(mac, thresh=55)
+alpha = ImageChops.invert(bgmask).filter(ImageFilter.GaussianBlur(0.8))
+mac_rgba = out.convert("RGBA")
+mac_rgba.putalpha(alpha)
+mac_path = PATH.replace("icon.png", "icon-mac.png") if PATH.endswith("icon.png") else PATH + ".mac.png"
+mac_rgba.save(mac_path, "PNG", pnginfo=info, optimize=True)
+print(f"Версия для Mac: {mac_path} (прозрачный фон)")
 print(f"Готово: {PATH} → {SIZE}×{SIZE}, белый фон, рамки убраны, поля обрезаны")

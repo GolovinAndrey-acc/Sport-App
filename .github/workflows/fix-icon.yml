@@ -35,12 +35,12 @@ jobs:
 
       - name: Сохранить исправленную иконку
         run: |
-          if git diff --quiet -- icon.png index.html manifest.json; then
+          if git diff --quiet -- icon.png index.html manifest.json && [ -z "$(git status --porcelain icon-mac.png)" ]; then
             echo "Изменений нет"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add icon.png index.html manifest.json
+          git add icon.png icon-mac.png index.html manifest.json
           git commit -m "Иконка автоматически приведена в порядок"
           git push
