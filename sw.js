@@ -1,6 +1,6 @@
 // Service worker: приложение открывается мгновенно из сохранённой копии,
 // а свежая версия с GitHub тихо скачивается в фоне и показывается при следующем открытии.
-const CACHE = "sport-v51";
+const CACHE = "sport-v52";
 const FILES = ["./", "index.html", "style.css", "app.js", "data.js", "manifest.json"];
 
 self.addEventListener("install", e => {

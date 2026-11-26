@@ -438,3 +438,5 @@ html.vt-tab::view-transition-new(root) { animation: vtFadeUp .2s cubic-bezier(.2
 
 /* Пауза перед заставкой при возвращении в приложение */
 #splash.sp-wait, #splash.sp-wait * { animation-play-state: paused !important; }
+
+.ex-video { width: 100%; max-height: 420px; border-radius: 14px; background: #000; display: block; }

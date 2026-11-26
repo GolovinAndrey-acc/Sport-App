@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.50";
+const APP_VERSION = "0.51";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -61,7 +61,9 @@ function exerciseCard(ex) {
     ? `<h4>Техника</h4><ol>${ex.technique.map(t => `<li>${esc(t)}</li>`).join("")}</ol>` : "";
   const prog = ex.progression ? `<h4>Когда увеличивать нагрузку</h4><p>${esc(ex.progression)}</p>` : "";
   const safe = ex.safety ? `<h4>Безопасность</h4><p>${esc(ex.safety)}</p>` : "";
-  const vid = ex.video ? `<h4>Видео</h4><p><a href="${esc(ex.video)}" target="_blank" rel="noopener">Открыть</a></p>` : "";
+  const vid = ex.video
+    ? `<h4>Видео</h4><video class="ex-video" src="${esc(ex.video)}" muted loop playsinline autoplay controls preload="metadata"></video>`
+    : "";
   const body = tech + prog + safe + vid;
 
   return `
