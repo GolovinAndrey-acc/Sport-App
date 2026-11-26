@@ -1,7 +1,7 @@
 // Логика приложения: навигация по вкладкам и отрисовка экранов.
 // Данные (разделы и упражнения) лежат в data.js.
 
-const APP_VERSION = "0.56";
+const APP_VERSION = "0.57";
 const STORAGE_PREFIX = "sport:";
 const view = document.getElementById("view");
 const titleEl = document.getElementById("title");
@@ -71,9 +71,13 @@ function exerciseCard(ex) {
   // Если файла нет — блок с видео просто не появляется.
   const vsrc = ex.video || (ex.id ? `videos/${ex.id}.mp4` : "");
   const vid = vsrc
-    ? `<div class="ex-vwrap" hidden><h4>Видео</h4><video class="ex-video" src="${esc(vsrc)}" muted loop playsinline autoplay controls preload="auto"
-         onended="this.currentTime=0;this.play()"
-         onloadeddata="this.parentNode.hidden=false" onerror="this.parentNode.remove()"></video></div>`
+    ? `<div class="ex-vwrap" hidden><h4>Видео</h4><div class="ex-vbox">
+         <video class="ex-video" src="${esc(vsrc)}#t=0.1" muted loop playsinline preload="metadata"
+           onloadeddata="this.closest('.ex-vwrap').hidden=false" onerror="this.closest('.ex-vwrap').remove()"
+           onplay="playOnly(this)" onpause="this.parentNode.classList.remove('playing')"
+           onended="this.currentTime=0;this.play()"></video>
+         <button class="ex-play" aria-label="Смотреть" onclick="toggleVideo(this.previousElementSibling)">▶</button>
+       </div></div>`
     : "";
   const body = vid + mg + tech + prog + safe;
 
@@ -89,6 +93,17 @@ function exerciseCard(ex) {
 }
 
 let currentSection = null;
+
+// Видео играет только по нажатию; запущенное останавливает остальные
+function playOnly(v) {
+  document.querySelectorAll(".ex-video").forEach(o => { if (o !== v && !o.paused) o.pause(); });
+  v.parentNode.classList.add("playing");
+}
+function toggleVideo(v) { v.paused ? v.play() : v.pause(); }
+document.addEventListener("click", e => {
+  const v = e.target.closest && e.target.closest(".ex-video");
+  if (v) { e.preventDefault(); toggleVideo(v); }
+});
 
 // Ползунок и стрелки под рядом упражнений
 function setupRow() {

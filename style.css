@@ -481,3 +481,17 @@ html.vt-tab::view-transition-new(root) { animation: vtFadeUp .2s cubic-bezier(.2
 
 /* На телефоне карточка после свайпа встаёт ровно; на Mac прокрутка свободная, без «прилипания» */
 @media (pointer: coarse) { .ex-row { scroll-snap-type: x mandatory; } }
+
+/* Видео по нажатию */
+.ex-vbox { position: relative; }
+.ex-video { cursor: pointer; }
+.ex-play {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 68px; height: 68px; border-radius: 50%; border: 0; cursor: pointer;
+  background: rgba(15, 17, 50, .65); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  color: #fff; font-size: 26px; padding-left: 6px;
+  box-shadow: 0 0 0 2px rgba(127, 240, 203, .7), 0 8px 24px rgba(0, 0, 0, .45);
+  transition: opacity .2s, transform .15s;
+}
+.ex-play:active { transform: translate(-50%, -50%) scale(.92); }
+.ex-vbox.playing .ex-play { opacity: 0; pointer-events: none; }
