@@ -67,14 +67,12 @@ const SECTIONS = [
     ],
   },
   {
-    id: "knee", title: "Восстановление колена", icon: "🩹", color: "#f2c94c",
-    note: "Перед началом согласуй упражнения с врачом или реабилитологом. Боль во время упражнения — сигнал остановиться.",
+    id: "knee", title: "Восстановление коленей", icon: "🩹", color: "#f2c94c",
     subs: [
-      { id: "main",     title: "Основные",            exercises: [] },
-      { id: "thigh",    title: "Мышцы бедра",         exercises: [] },
-      { id: "hips",     title: "Ягодицы и таз",       exercises: [] },
-      { id: "foot",     title: "Стопа и голеностоп",  exercises: [] },
-      { id: "mobility", title: "Подвижность",         exercises: [] },
+      { id: "warmup",   title: "Разминка",    exercises: [] },
+      { id: "easy",     title: "Лёгкий",      exercises: [] },
+      { id: "medium",   title: "Средний",     exercises: [] },
+      { id: "advanced", title: "Продвинутый", exercises: [] },
     ],
   },
   {
